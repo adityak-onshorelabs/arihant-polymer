@@ -1,8 +1,8 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from "react";
 import { createSeed, TODAY, addDays, STAFF } from "./seed";
-import { ORDER_STAGES, type DemoState, type Enquiry, type GodownId, type Listing, type Order, type Quote, type Requirement, type Role } from "./types";
+import { ORDER_STAGES, type DemoState, type Enquiry, type GodownId, type Listing, type MarketOrder, type Order, type Quote, type Requirement, type Role, type Seller } from "./types";
 
 const KEY = "arihant-demo-v1";
 export const SITE_LEADS = "arihant-demo-site-leads";
@@ -23,12 +23,15 @@ type Action =
   | { type: "addEnquiry"; enquiry: Omit<Enquiry, "id" | "date" | "owner" | "status" | "followUp"> }
   | { type: "enquiryStatus"; id: string; status: Enquiry["status"] }
   | { type: "setMargin"; value: number }
-  | { type: "updateListing"; id: string; patch: Partial<Pick<Listing, "price" | "stock">> }
+  | { type: "updateListing"; id: string; patch: Partial<Pick<Listing, "price" | "stock" | "deliveryDays" | "paused">> }
+  | { type: "removeListing"; id: string }
+  | { type: "addSeller"; seller: Pick<Seller, "name" | "city" | "gst" | "phone"> }
+  | { type: "marketOrderStatus"; id: string; status: MarketOrder["status"] }
   | { type: "addListing"; listing: Omit<Listing, "id"> }
   | { type: "postRequirement"; req: Omit<Requirement, "id" | "date" | "responses"> }
   | { type: "respond"; reqId: string; sellerId: string; price: number; days: number }
   | { type: "sellerStatus"; id: string; status: "Live" | "Paused" }
-  | { type: "marketOrder"; listingId: string; qty: number; buyerName: string }
+  | { type: "marketOrder"; listingId: string; qty: number; buyerName: string; buyerPhone?: string; city?: string }
   | { type: "addOrder"; order: Omit<Order, "id" | "date" | "stage"> };
 
 function log(s: DemoState, text: string): DemoState {
@@ -81,7 +84,8 @@ function mergeLeads(base: DemoState, leads: SiteLead[]): DemoState {
 function reducer(s: DemoState, a: Action): DemoState {
   switch (a.type) {
     case "hydrate": {
-      const merged = mergeLeads(a.state ?? s, a.leads);
+      // Saved state from an older build may lack newer fields; the seed fills them.
+      const merged = mergeLeads(a.state ? { ...s, ...a.state } : s, a.leads);
       const teamRoles = ["owner", "sales", "accounts", "godown"];
       return { ...merged, role: merged.role && teamRoles.includes(merged.role) ? merged.role : "owner", _ready: true };
     }
@@ -181,6 +185,14 @@ function reducer(s: DemoState, a: Action): DemoState {
       return { ...s, enquiries: s.enquiries.map((e) => (e.id === a.id ? { ...e, status: a.status } : e)) };
     case "updateListing":
       return { ...s, listings: s.listings.map((l) => (l.id === a.id ? { ...l, ...a.patch } : l)) };
+    case "removeListing":
+      return { ...s, listings: s.listings.filter((l) => l.id !== a.id) };
+    case "addSeller": {
+      const id = `S${s.seq + 1}`;
+      return log({ ...s, seq: s.seq + 1, sellers: [...s.sellers, { ...a.seller, id, verified: false, rating: 0, status: "Pending" }] }, `${a.seller.name} applied to sell on the marketplace`);
+    }
+    case "marketOrderStatus":
+      return { ...s, marketOrders: s.marketOrders.map((o) => (o.id === a.id ? { ...o, status: a.status } : o)) };
     case "addListing":
       return log({ ...s, listings: [{ ...a.listing, id: `L${s.seq + 1}` }, ...s.listings], seq: s.seq + 1 }, `New listing added to the marketplace`);
     case "postRequirement":
@@ -196,7 +208,16 @@ function reducer(s: DemoState, a: Action): DemoState {
       const l = s.listings.find((x) => x.id === a.listingId);
       if (!l) return s;
       const seller = s.sellers.find((x) => x.id === l.sellerId);
-      return log({ ...s, listings: s.listings.map((x) => (x.id === l.id ? { ...x, stock: Math.max(0, x.stock - a.qty) } : x)) }, `${a.buyerName} ordered ${a.qty} t from ${seller?.name} on the marketplace`);
+      const seq = s.seq + 1;
+      const order: MarketOrder = { id: `M${seq}`, date: TODAY, listingId: l.id, sellerId: l.sellerId, itemKey: l.itemKey, qty: a.qty, price: l.price, buyerName: a.buyerName, buyerPhone: a.buyerPhone ?? "", city: a.city ?? "", status: "New" };
+      let next: DemoState = { ...s, seq, marketOrders: [order, ...s.marketOrders], listings: s.listings.map((x) => (x.id === l.id ? { ...x, stock: Math.max(0, x.stock - a.qty) } : x)) };
+      // Orders for Arihant's own stock reach the office inbox like any other enquiry.
+      if (l.sellerId === "arihant") {
+        const it = s.items.find((i) => i.key === l.itemKey);
+        const e: Enquiry = { id: `E${seq}`, date: TODAY, source: "Website", buyerName: a.buyerName, city: a.city ?? "", itemKey: l.itemKey, text: `${it?.code ?? "Grade"}, ${a.qty} t at ${rs(l.price)}/kg (order on the marketplace)`, qty: a.qty, status: "New", owner: "Rohit", followUp: TODAY };
+        next = { ...next, enquiries: [e, ...next.enquiries] };
+      }
+      return log(next, `${a.buyerName} ordered ${a.qty} t from ${seller?.name} on the marketplace`);
     }
   }
 }
@@ -207,6 +228,8 @@ const DemoCtx = createContext<Ctx | null>(null);
 export function DemoProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, createSeed);
   const ready = state._ready === true;
+  // Set when state arrives from another tab, so it is not written straight back.
+  const fromOtherTab = useRef(false);
 
   useEffect(() => {
     let saved: DemoState | null = null;
@@ -219,8 +242,17 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     } catch {}
     dispatch({ type: "hydrate", state: saved, leads });
 
-    // The website runs in an iframe on the Website screen; pick up its rate requests live.
+    // The website runs in an iframe on the Website screen, and the marketplace may be open
+    // in another tab; pick up their rate requests and changes live.
     const onStorage = (e: StorageEvent) => {
+      if (e.key === KEY && e.newValue) {
+        try {
+          const next = JSON.parse(e.newValue);
+          fromOtherTab.current = true;
+          dispatch({ type: "hydrate", state: next, leads: [] });
+        } catch {}
+        return;
+      }
       if (e.key !== SITE_LEADS || !e.newValue) return;
       try {
         const fresh: SiteLead[] = JSON.parse(e.newValue);
@@ -234,6 +266,10 @@ export function DemoProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!ready) return;
+    if (fromOtherTab.current) {
+      fromOtherTab.current = false;
+      return;
+    }
     try {
       localStorage.setItem(KEY, JSON.stringify({ ...state, _ready: undefined }));
     } catch {}

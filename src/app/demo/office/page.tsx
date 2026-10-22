@@ -60,14 +60,14 @@ export default function Today() {
               <LevelNote level={level} />
             </PageTitle>
 
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div data-tour="stats" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
               <Stat label="Orders today" value={today.length} />
               <Stat label="Waiting to be sent" value={toSend.length} note="orders to pack or load" />
               <Stat label="New enquiries" value={leads.length} />
               <Stat label="Overdue over 30 days" value={inr(overdue.reduce((a, i) => a + i.amount, 0))} tone="print" />
             </div>
 
-            <section className="border border-print/40 bg-print-tint p-5 md:p-6" aria-labelledby="try-title">
+            <section data-tour="try" className="border border-print/40 bg-print-tint p-5 md:p-6" aria-labelledby="try-title">
               <h2 id="try-title" className="text-lg font-bold">
                 Try this: one order, start to finish
               </h2>
@@ -90,7 +90,7 @@ export default function Today() {
             </section>
 
             <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-              <Panel title="Needs your attention">
+              <Panel title="Needs your attention" tour="attention">
                 {attention.length === 0 ? (
                   <p className="text-ink-2">Nothing urgent today.</p>
                 ) : (

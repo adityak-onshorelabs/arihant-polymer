@@ -111,6 +111,7 @@ export interface Seller {
   rating: number;
   status: "Live" | "Pending" | "Paused";
   gst: string;
+  phone?: string; // demo sign-in on the marketplace seller login
 }
 
 export interface Listing {
@@ -121,6 +122,22 @@ export interface Listing {
   stock: number; // tonnes
   location: string;
   deliveryDays: number;
+  paused?: boolean; // hidden from buyers by the seller
+}
+
+/** An order placed by a buyer on the public marketplace. */
+export interface MarketOrder {
+  id: string;
+  date: string;
+  listingId: string;
+  sellerId: string;
+  itemKey: string;
+  qty: number; // tonnes
+  price: number; // Rs/kg at the time of order
+  buyerName: string;
+  buyerPhone: string;
+  city: string;
+  status: "New" | "Accepted" | "Dispatched";
 }
 
 export interface Requirement {
@@ -152,6 +169,7 @@ export interface DemoState {
   sellers: Seller[];
   listings: Listing[];
   requirements: Requirement[];
+  marketOrders: MarketOrder[];
   priceMoves: PriceMove[];
   margins: { default: number; min: number };
   log: { at: string; text: string }[];

@@ -1,120 +1,144 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { BadgeCheck } from "lucide-react";
-import { families, type Family } from "@/content/catalogue";
-import { rs, useDemo } from "@/lib/demo/store";
-import { Btn, Gate, LevelNote, MARKET_TABS, PageTitle, Panel, SubTabs, Tag } from "@/components/demo/ui";
+import Link from "next/link";
+import { ExternalLink, Store } from "lucide-react";
+import { families } from "@/content/catalogue";
+import { fmtDate, inr, useDemo } from "@/lib/demo/store";
+import { COMMISSION } from "@/lib/demo/seller-session";
+import { Btn, Gate, PageTitle, Panel, Table, Tag } from "@/components/demo/ui";
 
-export default function Marketplace() {
+/**
+ * The marketplace itself lives on the website (/marketplace, with its own seller
+ * login). This is Arihant's side of it: who may sell, what it earns, and every sale.
+ */
+export default function MarketControl() {
   const { state, dispatch } = useDemo();
-  const [q, setQ] = useState("");
-  const [fam, setFam] = useState<Family | "ALL">("ALL");
-  const [open, setOpen] = useState<string | null>(null);
-  const [qty, setQty] = useState(5);
-  const [done, setDone] = useState<string | null>(null);
-
-  const groups = useMemo(() => {
-    const live = new Set(state.sellers.filter((s) => s.status === "Live").map((s) => s.id));
-    const ql = q.toLowerCase();
-    const items = state.items.filter((i) => (fam === "ALL" || i.family === fam) && (!ql || `${i.code} ${i.producer} ${i.process}`.toLowerCase().includes(ql)));
-    return items
-      .map((i) => ({ item: i, offers: state.listings.filter((l) => l.itemKey === i.key && live.has(l.sellerId) && l.stock > 0).sort((a, b) => a.price - b.price) }))
-      .filter((g) => g.offers.length > 0)
-      .slice(0, 24);
-  }, [state.items, state.listings, state.sellers, q, fam]);
-
   return (
     <Gate module="search">
       {(level) => {
-        const canBuy = level === "full";
+        const canEdit = level === "full";
+        const live = state.sellers.filter((s) => s.status === "Live").length;
+        const sales = state.marketOrders.reduce((a, o) => a + o.qty * 1000 * o.price, 0);
+        const demand = families
+          .map((f) => ({
+            f,
+            asks: state.requirements.filter((r) => state.items.find((i) => i.key === r.itemKey)?.family === f.id).reduce((a, r) => a + r.qty, 0) + state.enquiries.filter((e) => state.items.find((i) => i.key === e.itemKey)?.family === f.id).reduce((a, e) => a + e.qty, 0),
+            listed: state.listings.filter((l) => state.items.find((i) => i.key === l.itemKey)?.family === f.id).reduce((a, l) => a + l.stock, 0),
+          }))
+          .filter((d) => d.asks > 0 || d.listed > 0);
         return (
           <div className="space-y-6">
-            <PageTitle title="Marketplace" sub="Arihant's website, opened to other polymer sellers. A buyer searches once and sees every seller's price. Arihant earns on each sale.">
-              <LevelNote level={level} />
-            </PageTitle>
+            <PageTitle title="Marketplace" sub={`The marketplace runs on Arihant's website. Here Arihant decides who sells and sees every sale. ${live} sellers live now.`} />
 
-            <SubTabs items={MARKET_TABS} />
-            <p className="text-ink-2">What a buyer sees: search a grade, compare sellers, order. Arihant&apos;s own stock carries the Arihant Assured badge.</p>
-            <div className="flex flex-col gap-3 md:flex-row">
-              <label className="flex h-12 flex-1 items-center border-2 border-ink bg-sack px-3">
-                <span className="sr-only">Search the marketplace</span>
-                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search grade, producer or process" className="w-full bg-transparent outline-none" />
-              </label>
-              <div className="flex flex-wrap gap-1" role="group" aria-label="Polymer family">
-                {(["ALL", "PP", "HDPE", "LLDPE", "LDPE", "STYRENICS", "PVC"] as const).map((f) => (
-                  <button key={f} type="button" aria-pressed={fam === f} onClick={() => setFam(f)} className={`min-h-12 border-2 border-ink px-3 text-sm font-semibold ${fam === f ? "bg-ink text-sack" : "hover:bg-sack-2"}`}>
-                    {f === "ALL" ? "All" : families.find((x) => x.id === f)?.short}
-                  </button>
-                ))}
+            <div data-tour="market-open" className="weave-print grid gap-4 p-5 text-on-print md:grid-cols-[1fr_auto] md:items-center md:p-6">
+              <div>
+                <p className="flex items-center gap-2 text-sm font-semibold">
+                  <Store aria-hidden className="size-4" />
+                  On the website, under the Marketplace button
+                </p>
+                <p className="t-h3 mt-2 text-[1.7rem]">Buyers compare and order there. Sellers sign in there.</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Link href="/marketplace" target="_blank" className="inline-flex min-h-12 items-center gap-2 bg-sack px-4 font-semibold text-print hover:bg-sack-2">
+                  Open the marketplace
+                  <ExternalLink aria-hidden className="size-4" />
+                </Link>
+                <Link href="/marketplace/sell" target="_blank" className="inline-flex min-h-12 items-center gap-2 border-2 border-sack px-4 font-semibold text-on-print hover:bg-sack hover:text-print">
+                  Seller login
+                  <ExternalLink aria-hidden className="size-4" />
+                </Link>
               </div>
             </div>
 
-            {done && (
-              <p className="border-2 border-ok bg-[oklch(96%_0.03_150)] p-3 font-semibold" role="status">
-                {done}
-              </p>
-            )}
+            <Panel title="Sellers" tour="market-sellers">
+              <Table head={["Seller", "City", "GST", "Rating", "Status", ""]}>
+                {state.sellers
+                  .filter((s) => s.id !== "arihant")
+                  .map((s) => (
+                    <tr key={s.id}>
+                      <td className="font-semibold">{s.name}</td>
+                      <td>{s.city}</td>
+                      <td className="font-mono text-xs">{s.gst}</td>
+                      <td>{s.rating ? `★ ${s.rating}` : "New"}</td>
+                      <td>
+                        <Tag tone={s.status === "Live" ? "ok" : s.status === "Pending" ? "warn" : "plain"}>{s.status === "Pending" ? "Awaiting checks" : s.status}</Tag>
+                      </td>
+                      <td className="space-x-2 text-end">
+                        {canEdit && s.status !== "Live" && <Btn onClick={() => dispatch({ type: "sellerStatus", id: s.id, status: "Live" })}>{s.status === "Pending" ? "Approve" : "Resume"}</Btn>}
+                        {canEdit && s.status === "Live" && (
+                          <Btn variant="line" onClick={() => dispatch({ type: "sellerStatus", id: s.id, status: "Paused" })}>
+                            Pause
+                          </Btn>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+              </Table>
+            </Panel>
 
-            <div className="space-y-3">
-              {groups.map(({ item, offers }) => (
-                <Panel key={item.key}>
-                  <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <p>
-                      <span className="t-code text-3xl text-print">{item.code}</span>
-                      <span className="ms-3 font-semibold">{item.producer}</span>
-                      <span className="ms-2 text-ink-2">{item.process}</span>
-                    </p>
-                    <span className="text-sm text-ink-2">
-                      {offers.length} seller{offers.length > 1 ? "s" : ""} · from {rs(offers[0].price)}/kg
-                    </span>
-                  </div>
-                  <ul className="mt-3 divide-y divide-seam border-t border-seam text-sm">
-                    {offers.map((l) => {
-                      const s = state.sellers.find((x) => x.id === l.sellerId)!;
-                      return (
-                        <li key={l.id} className="grid items-center gap-2 py-2 sm:grid-cols-[1fr_7rem_6rem_6rem_auto]">
-                          <span className="flex flex-wrap items-center gap-2">
-                            <b>{s.name}</b>
-                            {s.id === "arihant" ? <Tag tone="print">Arihant Assured</Tag> : s.verified && <BadgeCheck aria-label="Verified seller" className="size-4 text-ok" />}
-                            <span className="text-ink-2">{l.location}</span>
-                            {s.rating > 0 && <span className="text-ink-2">★ {s.rating}</span>}
-                          </span>
-                          <span className="text-lg font-bold">{rs(l.price)}</span>
-                          <span>{l.stock} t</span>
-                          <span className="text-ink-2">{l.deliveryDays} days</span>
-                          <span className="sm:text-end">
-                            {canBuy && (
-                              <Btn variant="line" onClick={() => setOpen(open === l.id ? null : l.id)} aria-expanded={open === l.id}>
-                                Order
-                              </Btn>
-                            )}
-                          </span>
-                          {open === l.id && (
-                            <div className="flex flex-wrap items-center gap-2 bg-sack-2 p-3 sm:col-span-5">
-                              <label className="flex items-center gap-2">
-                                Quantity (t)
-                                <input type="number" min={1} max={l.stock} value={qty} onChange={(e) => setQty(Math.max(1, Math.min(l.stock, Number(e.target.value))))} className="h-10 w-20 border-2 border-ink bg-sack px-2 font-bold" />
-                              </label>
-                              <span>= ₹{Math.round(qty * 1000 * l.price * 1.18).toLocaleString("en-IN")} incl. GST, paid through the platform</span>
-                              <Btn
-                                onClick={() => {
-                                  dispatch({ type: "marketOrder", listingId: l.id, qty, buyerName: "Shree Ganesh Moulders" });
-                                  setDone(`Order placed: ${qty} t ${item.code} from ${s.name}. Payment held by the platform until delivery; seller paid minus commission.`);
-                                  setOpen(null);
-                                }}
-                              >
-                                Place order
-                              </Btn>
-                            </div>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </Panel>
-              ))}
-              {groups.length === 0 && <p className="text-ink-2">No sellers list that right now. Post a requirement and sellers will quote.</p>}
+            <Panel title={`Sales on the marketplace · ${inr(sales)}`} tour="market-orders">
+              {state.marketOrders.length === 0 ? (
+                <p className="text-ink-2">No orders yet.</p>
+              ) : (
+                <Table head={["Date", "Buyer", "Seller", "Grade", "Qty", "Value", "Arihant earns", "Status"]}>
+                  {state.marketOrders.map((o) => {
+                    const it = state.items.find((i) => i.key === o.itemKey);
+                    const value = o.qty * 1000 * o.price;
+                    return (
+                      <tr key={o.id}>
+                        <td>{fmtDate(o.date)}</td>
+                        <td className="font-semibold">{o.buyerName}</td>
+                        <td>{state.sellers.find((s) => s.id === o.sellerId)?.name}</td>
+                        <td className="font-bold text-print">{it?.code}</td>
+                        <td>{o.qty} t</td>
+                        <td>{inr(value)}</td>
+                        <td>{o.sellerId === "arihant" ? "Own stock" : inr(value * COMMISSION)}</td>
+                        <td>
+                          <Tag tone={o.status === "Dispatched" ? "ok" : o.status === "Accepted" ? "warn" : "print"}>{o.status}</Tag>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </Table>
+              )}
+              <p className="mt-3 text-sm text-ink-2">Orders for Arihant&apos;s own stock also land in Enquiries for the sales team.</p>
+            </Panel>
+
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Panel title="Earning settings (sample values)">
+                <ul className="divide-y divide-seam text-sm">
+                  {[
+                    ["Commission on each sale", `${(COMMISSION * 100).toFixed(1)}%`],
+                    ["Seller plan, standard", "₹2,500 / month"],
+                    ["Featured listing", "₹1,000 / grade / week"],
+                    ["Arihant delivery service", "from ₹0.40 / kg"],
+                  ].map(([k, v]) => (
+                    <li key={k} className="flex justify-between py-2">
+                      <span>{k}</span>
+                      <b>{v}</b>
+                    </li>
+                  ))}
+                </ul>
+              </Panel>
+              <Panel title="Market insight: demand vs listed">
+                <ul className="space-y-3 text-sm">
+                  {demand.map(({ f, asks, listed }) => (
+                    <li key={f.id}>
+                      <div className="flex justify-between">
+                        <b>{f.short}</b>
+                        <span className="text-ink-2">
+                          asked {asks} t · listed {listed} t
+                        </span>
+                      </div>
+                      <div className="mt-1 flex h-2 gap-0.5">
+                        <div className="bg-print" style={{ width: `${Math.min(100, asks)}%` }} />
+                        <div className="bg-ink/40" style={{ width: `${Math.min(100, listed / 4)}%` }} />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-3 text-xs text-ink-2">Red: tonnes asked in enquiries and requirements. Grey: tonnes listed (scaled). Gaps show which sellers to bring in.</p>
+              </Panel>
             </div>
           </div>
         );

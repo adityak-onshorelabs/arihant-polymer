@@ -53,7 +53,7 @@ export default function QuickQuote() {
             </PageTitle>
 
             <div className="grid gap-6 xl:grid-cols-5">
-              <Panel title="Build a quote" className="xl:col-span-3">
+              <Panel title="Build a quote" className="xl:col-span-3" tour="quote-build">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="block">
                     <span className="text-sm font-semibold text-ink-2">Grade</span>
@@ -110,7 +110,7 @@ export default function QuickQuote() {
                 </dl>
               </Panel>
 
-              <Panel title="Your price" className="xl:col-span-2">
+              <Panel title="Your price" className="xl:col-span-2" tour="quote-price">
                 <div className="divide-y divide-seam">
                   <div className="flex items-baseline justify-between py-3">
                     <span>
@@ -172,7 +172,7 @@ export default function QuickQuote() {
               </Panel>
             </div>
 
-            <Panel title="Quotes">
+            <Panel title="Quotes" tour="quote-list">
               <Table head={["Quote", "Date", "Buyer", "Grade", "Qty", "In stock", "To buy", "By", "Status", ""]}>
                 {quotes.map((q) => {
                   const b = state.buyers.find((x) => x.id === q.buyerId);

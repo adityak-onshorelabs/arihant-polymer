@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { useDemo } from "@/lib/demo/store";
 import { levelFor, modules, roleInfo, TEAM, type ModuleId } from "@/lib/demo/access";
+import { TourButton } from "./tour";
 
 const ICONS: Record<ModuleId, LucideIcon> = {
   dashboard: House,
@@ -95,10 +96,14 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         <span className="mt-1 block text-xs font-semibold text-sack/60">Polymer · software demo</span>
       </Link>
       <div className="flex-1 overflow-y-auto px-3 pb-4">
-        <p className="px-3 pb-2 text-xs font-semibold text-sack/50">Office</p>
-        <NavList group="team" onNavigate={onNavigate} />
-        <p className="mt-6 px-3 pb-2 text-xs font-semibold text-sack/50">Online</p>
-        <NavList group="online" onNavigate={onNavigate} />
+        <div data-tour="nav-office">
+          <p className="px-3 pb-2 text-xs font-semibold text-sack/50">Office</p>
+          <NavList group="team" onNavigate={onNavigate} />
+        </div>
+        <div data-tour="nav-online" className="mt-6">
+          <p className="px-3 pb-2 text-xs font-semibold text-sack/50">Online</p>
+          <NavList group="online" onNavigate={onNavigate} />
+        </div>
       </div>
       <div className="border-t border-sack/15 px-3 py-3">
         <NavList group="bottom" onNavigate={onNavigate} />
@@ -139,12 +144,12 @@ export function DemoShell({ children }: { children: ReactNode }) {
         )}
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 border-b border-seam bg-sack">
+          <header className="z-30 border-b border-seam bg-sack lg:sticky lg:top-0">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3 md:px-8">
-              <button type="button" onClick={() => setMenu(true)} className="flex size-11 items-center justify-center border-2 border-ink lg:hidden" aria-label="Open menu">
+              <button type="button" data-tour="menu-btn" onClick={() => setMenu(true)} className="flex size-11 items-center justify-center border-2 border-ink lg:hidden" aria-label="Open menu">
                 <Menu aria-hidden className="size-5" />
               </button>
-              <div className="flex flex-wrap items-center gap-2">
+              <div data-tour="roles" className="flex flex-wrap items-center gap-2">
                 <span className="text-sm text-ink-2">Showing the screen of</span>
                 <div role="radiogroup" aria-label="Whose screen" className="flex flex-wrap gap-1">
                   {TEAM.map((r) => {
@@ -168,6 +173,7 @@ export function DemoShell({ children }: { children: ReactNode }) {
                 </div>
               </div>
               <div className="ms-auto flex flex-wrap items-center gap-2">
+                {ready && <TourButton />}
                 <Link href="/" target="_blank" className="inline-flex min-h-10 items-center gap-1.5 bg-print px-3 text-sm font-semibold text-on-print hover:bg-print-deep">
                   <Globe aria-hidden className="size-4" />
                   Open the website

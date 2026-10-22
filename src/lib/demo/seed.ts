@@ -5,7 +5,7 @@
  */
 
 import { gradeSlug, grades, type Family } from "@/content/catalogue";
-import type { Buyer, DemoState, Enquiry, Invoice, Item, Listing, Order, PriceMove, PurchaseOrder, Quote, Requirement, Seller } from "./types";
+import type { Buyer, DemoState, Enquiry, Invoice, Item, Listing, MarketOrder, Order, PriceMove, PurchaseOrder, Quote, Requirement, Seller } from "./types";
 
 export const TODAY = "2026-10-22";
 
@@ -222,11 +222,11 @@ export function createSeed(): DemoState {
 
   const sellers: Seller[] = [
     { id: "arihant", name: "Arihant Polymer", city: "Malad West, Mumbai", verified: true, rating: 4.5, status: "Live", gst: "27AAAFA3846Q1Z3" },
-    { id: "S1", name: "Shah Petrochem", city: "Bhiwandi", verified: true, rating: 4.3, status: "Live", gst: "27ABCDE1234F1Z5" },
-    { id: "S2", name: "Gujarat Polymer Traders", city: "Ahmedabad", verified: true, rating: 4.1, status: "Live", gst: "24ABCDE2345G1Z6" },
-    { id: "S3", name: "Navkar Plastics", city: "Surat", verified: true, rating: 3.9, status: "Live", gst: "24ABCDE3456H1Z7" },
-    { id: "S4", name: "Mehta Resins", city: "Pune", verified: false, rating: 0, status: "Pending", gst: "27ABCDE4567J1Z8" },
-    { id: "S5", name: "Om Sai Polymers", city: "Vapi", verified: false, rating: 0, status: "Pending", gst: "24ABCDE5678K1Z9" },
+    { id: "S1", name: "Shah Petrochem", city: "Bhiwandi", verified: true, rating: 4.3, status: "Live", gst: "27ABCDE1234F1Z5", phone: "9800011111" },
+    { id: "S2", name: "Gujarat Polymer Traders", city: "Ahmedabad", verified: true, rating: 4.1, status: "Live", gst: "24ABCDE2345G1Z6", phone: "9800022222" },
+    { id: "S3", name: "Navkar Plastics", city: "Surat", verified: true, rating: 3.9, status: "Live", gst: "24ABCDE3456H1Z7", phone: "9800033333" },
+    { id: "S4", name: "Mehta Resins", city: "Pune", verified: false, rating: 0, status: "Pending", gst: "27ABCDE4567J1Z8", phone: "9800044444" },
+    { id: "S5", name: "Om Sai Polymers", city: "Vapi", verified: false, rating: 0, status: "Pending", gst: "24ABCDE5678K1Z9", phone: "9800055555" },
   ];
 
   const listings: Listing[] = [];
@@ -239,6 +239,17 @@ export function createSeed(): DemoState {
         listings.push({ id: `L${i}${s}`, sellerId: s, itemKey: it.key, price: round(it.rate + 2 + r() * 4), stock: Math.round(5 + r() * 40), location: city, deliveryDays: [2, 3, 4][j] });
       }
     });
+  });
+
+  const marketOrders: MarketOrder[] = [
+    ["S1", 0, "Kandivali Toys", "Mumbai", 5, "New", 0],
+    ["S1", 1, "Daman Polyfilms", "Daman", 8, "Accepted", -1],
+    ["S1", 2, "Nashik Crates", "Nashik", 3, "Dispatched", -3],
+    ["S2", 0, "Kumar Polytech", "Hyderabad", 10, "New", 0],
+  ].flatMap(([seller, n, buyerName, city, qty, status, ago], i) => {
+    const l = listings.filter((x) => x.sellerId === seller)[n as number];
+    if (!l) return [];
+    return [{ id: `M${300 + i}`, date: addDays(TODAY, ago as number), listingId: l.id, sellerId: l.sellerId, itemKey: l.itemKey, qty: qty as number, price: l.price, buyerName: buyerName as string, buyerPhone: "98xxxxxx10", city: city as string, status: status as MarketOrder["status"] }];
   });
 
   const requirements: Requirement[] = [
@@ -266,6 +277,7 @@ export function createSeed(): DemoState {
     sellers,
     listings,
     requirements,
+    marketOrders,
     priceMoves,
     margins: { default: 3, min: 2 },
     log: [

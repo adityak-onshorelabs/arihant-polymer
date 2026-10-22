@@ -10,7 +10,7 @@ import { levelFor, roleInfo, type Level, type ModuleId } from "@/lib/demo/access
 /** Page heading in plain sentence case, with one line saying what the screen is for. */
 export function PageTitle({ title, sub, children }: { no?: string; title: string; sub?: ReactNode; children?: ReactNode }) {
   return (
-    <div className="flex flex-col gap-3 pb-2 md:flex-row md:items-end md:justify-between">
+    <div data-tour="page" className="flex flex-col gap-3 pb-2 md:flex-row md:items-end md:justify-between">
       <div>
         <h1 className="text-[1.9rem] font-bold leading-tight tracking-tight md:text-[2.2rem]">{title}</h1>
         {sub && <p className="mt-1 max-w-2xl text-[1.05rem] text-ink-2">{sub}</p>}
@@ -21,10 +21,10 @@ export function PageTitle({ title, sub, children }: { no?: string; title: string
 }
 
 /** Tabs that link between screens of one section (e.g. Orders: list, dispatch, new). */
-export function SubTabs({ items }: { items: { href: string; label: string }[] }) {
+export function SubTabs({ items, tour }: { items: { href: string; label: string }[]; tour?: string }) {
   const path = usePathname();
   return (
-    <nav aria-label="Section" className="flex gap-6 overflow-x-auto border-b border-seam">
+    <nav aria-label="Section" data-tour={tour} className="flex gap-6 overflow-x-auto border-b border-seam">
       {items.map((t) => {
         const on = path === t.href;
         return (
@@ -48,12 +48,6 @@ export const ORDER_TABS = [
   { href: "/demo/office/new-order", label: "+ New order" },
 ];
 
-export const MARKET_TABS = [
-  { href: "/demo/market", label: "Find material" },
-  { href: "/demo/market/requirements", label: "Buyer requests" },
-  { href: "/demo/market/seller", label: "A seller's screen" },
-  { href: "/demo/market/admin", label: "Arihant's control" },
-];
 
 export function Btn({ variant = "solid", className, ...p }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "solid" | "line" | "quiet" }) {
   return (
@@ -71,9 +65,9 @@ export function Btn({ variant = "solid", className, ...p }: ButtonHTMLAttributes
   );
 }
 
-export function Panel({ title, action, children, className }: { title?: string; action?: ReactNode; children: ReactNode; className?: string }) {
+export function Panel({ title, action, children, className, tour }: { title?: string; action?: ReactNode; children: ReactNode; className?: string; tour?: string }) {
   return (
-    <section className={cn("border border-seam bg-[oklch(98.8%_0.004_85)]", className)}>
+    <section data-tour={tour} className={cn("border border-seam bg-[oklch(98.8%_0.004_85)]", className)}>
       {title && (
         <div className="flex items-center justify-between gap-3 px-5 pt-4">
           <h2 className="text-[1.05rem] font-bold">{title}</h2>

@@ -36,8 +36,8 @@ export default function Orders() {
               <LevelNote level={level} />
             </PageTitle>
 
-            <SubTabs items={ORDER_TABS} />
-            <div className="flex flex-wrap gap-1" role="group" aria-label="Filter orders">
+            <SubTabs items={ORDER_TABS} tour="order-tabs" />
+            <div data-tour="order-filter" className="flex flex-wrap gap-1" role="group" aria-label="Filter orders">
               {(["Open", ...ORDER_STAGES, "All"] as const).map((s) => (
                 <button key={s} type="button" aria-pressed={filter === s} onClick={() => setFilter(s)} className={`min-h-10 border-2 border-ink px-3 text-sm font-semibold ${filter === s ? "bg-ink text-sack" : "hover:bg-sack-2"}`}>
                   {s === "Open" ? "Not yet paid" : s}{" "}
@@ -49,14 +49,14 @@ export default function Orders() {
             </div>
 
             <div className="space-y-3">
-              {list.map((o) => {
+              {list.map((o, i) => {
                 const b = state.buyers.find((x) => x.id === o.buyerId)!;
                 const it = state.items.find((x) => x.key === o.itemKey);
                 const idx = ORDER_STAGES.indexOf(o.stage);
                 const next = ORDER_STAGES[idx + 1];
                 const mayMove = next && (CAN_MOVE[role] ?? []).includes(next) && !o.needsApproval;
                 return (
-                  <Panel key={o.id}>
+                  <Panel key={o.id} tour={i === 0 ? "order-card" : undefined}>
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
                       <div className="min-w-0 lg:w-80">
                         <p className="text-sm text-ink-2">

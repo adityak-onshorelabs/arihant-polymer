@@ -14,6 +14,8 @@ const PAGES = [
   { label: "About", path: "/about" },
   { label: "Reviews", path: "/reviews" },
   { label: "Rate request", path: "/contact?grade=mi3530-reliance" },
+  { label: "Marketplace", path: "/marketplace" },
+  { label: "Seller login", path: "/marketplace/sell" },
 ];
 
 const BUILT = [
@@ -22,6 +24,8 @@ const BUILT = [
   ["A page for every grade", "Producer, type, process, MFI where listed, related grades"],
   ["Rate request", "Grade, quantity and delivery point in three steps; lands in the enquiry inbox"],
   ["About and reviews", "Firm details, GST, address, IndiaMART rating 4.5 from 186 buyers"],
+  ["Marketplace", "Every seller's price for a grade in one search, an order form under each offer, post a requirement"],
+  ["Seller login and dashboard", "Mobile number and code sign-in; sellers manage their products, orders and buyer requests"],
   ["Search-ready", "Page titles, sitemap and business details for Google"],
 ];
 
@@ -38,14 +42,14 @@ export default function WebsiteSection() {
         <div className="space-y-6">
           <PageTitle title="Your website" sub="Arihant's own website, replacing the IndiaMART page." />
 
-          <div className="weave-print grid gap-4 p-5 text-on-print md:grid-cols-[1fr_auto] md:items-center md:p-6">
+          <div data-tour="site-banner" className="weave-print grid gap-4 p-5 text-on-print md:grid-cols-[1fr_auto] md:items-center md:p-6">
             <div>
               <p className="text-sm font-semibold flex items-center gap-2">
                 <Globe aria-hidden className="size-4" />
                 Built and working
               </p>
               <p className="t-h3 mt-2 text-[1.9rem]">This is the real website, not a mock-up.</p>
-              <p className="mt-2 max-w-2xl">It runs in this same project, with Arihant&apos;s real catalogue. Only the photos are placeholders until we get Arihant&apos;s own.</p>
+              <p className="mt-2 max-w-2xl">It runs in this same project, with Arihant&apos;s real catalogue of 236 grades and Arihant&apos;s own photos.</p>
             </div>
             <Link href="/" target="_blank" className="inline-flex min-h-12 items-center justify-center gap-2 bg-sack px-5 font-semibold text-print hover:bg-sack-2">
               Open the full website
@@ -53,7 +57,7 @@ export default function WebsiteSection() {
             </Link>
           </div>
 
-          <div role="tablist" aria-label="Website views" className="flex gap-6 border-b-2 border-ink">
+          <div data-tour="site-tabs" role="tablist" aria-label="Website views" className="flex gap-6 border-b-2 border-ink">
             {(
               [
                 ["customer", "Customer view"],
@@ -76,7 +80,7 @@ export default function WebsiteSection() {
 
           {tab === "customer" ? (
             <div className="grid gap-6 xl:grid-cols-[1fr_18rem]">
-              <div className="min-w-0 border-2 border-ink bg-sack-2">
+              <div data-tour="site-preview" className="min-w-0 border-2 border-ink bg-sack-2">
                 <div className="flex flex-wrap items-center gap-3 border-b-2 border-ink px-3 py-2">
                   <span className="flex gap-1.5" aria-hidden>
                     <span className="size-3 rounded-full bg-print" />
@@ -98,7 +102,7 @@ export default function WebsiteSection() {
                 <iframe key={`${page}-${nonce}`} src={page} title="Arihant Polymer website" className="block h-[78vh] min-h-[36rem] w-full bg-sack" />
               </div>
 
-              <Panel title="What is built">
+              <Panel title="What is built" tour="site-built">
                 <ul className="space-y-3 text-sm">
                   {BUILT.map(([t, d]) => (
                     <li key={t} className="flex gap-2">
@@ -111,11 +115,11 @@ export default function WebsiteSection() {
                   ))}
                 </ul>
                 <p className="mt-4 border-t border-seam pt-3 text-sm text-ink-2">
-                  Next on the website: buyer logins, online ordering and the marketplace. Those are shown in this demo under{" "}
+                  Arihant&apos;s side of the marketplace (approving sellers, every sale) is under{" "}
                   <Link href="/demo/market" className="font-semibold text-ink underline underline-offset-4">
                     Marketplace
-                  </Link>
-                  .
+                  </Link>{" "}
+                  in this demo.
                 </p>
               </Panel>
             </div>

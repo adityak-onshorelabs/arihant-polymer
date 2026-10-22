@@ -83,7 +83,7 @@ export default function WhatsAppDemo() {
     <div className="space-y-6">
       <PageTitle title="WhatsApp assistant" sub="Try it as a buyer who scanned Arihant's QR code at a trade show. Type in the phone on the left." />
       <div className="grid gap-8 lg:grid-cols-[22rem_1fr]">
-        <div className="mx-auto w-full max-w-[22rem] border-[6px] border-ink bg-[oklch(95%_0.012_150)]" style={{ borderRadius: 28 }}>
+        <div data-tour="wa-phone" className="mx-auto w-full max-w-[22rem] border-[6px] border-ink bg-[oklch(95%_0.012_150)]" style={{ borderRadius: 28 }}>
           <div className="flex items-center gap-3 bg-[oklch(42%_0.08_160)] px-4 py-3 text-sack" style={{ borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <span className="flex size-9 items-center justify-center bg-sack font-bold text-print" style={{ borderRadius: 999 }}>
               A
@@ -110,7 +110,7 @@ export default function WhatsAppDemo() {
             ))}
           </div>
           {chips.length > 0 && (
-            <div className="flex flex-wrap gap-1 px-3 pb-2">
+            <div data-tour="wa-chips" className="flex flex-wrap gap-1 px-3 pb-2">
               {chips.map((c) => (
                 <button key={c} type="button" onClick={() => handle(c)} className="min-h-9 border border-[oklch(42%_0.08_160)] bg-sack px-2.5 text-xs font-semibold" style={{ borderRadius: 999 }}>
                   {c}

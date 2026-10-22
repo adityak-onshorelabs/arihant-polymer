@@ -3,12 +3,16 @@
 Two things in one Next.js app, built by Onshore Labs:
 
 1. **The website** (`/`, `/products`, `/products/[grade]`, `/about`, `/reviews`, `/contact`): Arihant Polymer's own site, rebuilt from the content of its IndiaMART-hosted listing (arihantpolymer.in). 236 real grades crawled from every category page (spec tables, descriptions, minimum order, packing, delivery) with Arihant's own photos, searchable, with a rate request on every grade.
+   - **Marketplace** (`/marketplace`, Marketplace button in the navbar): every live seller's price per grade, cheapest first, with an order form under each offer and a "post a requirement" form. Sample sellers and prices.
+   - **Seller login** (`/marketplace/sell`): demo sign-in by mobile number and code (code `123456`, sample sellers listed on the page) or apply to sell. The seller dashboard (`/marketplace/sell/dashboard`) manages products (price, stock, dispatch days, hide, remove, add), orders (accept, mark dispatched) and buyer requests.
 2. **The platform demo** (`/demo`): a clickable, front-end-only demo of the three systems in the proposal, with role-based access and **invented sample data**:
-   - System 1, Website and Marketplace: Visitor, Buyer, Seller, Arihant admin.
+   - System 1, Website and Marketplace: the marketplace and seller login live on the website (above). The demo's Marketplace screen is Arihant's side only: approve or pause sellers, every sale, earnings.
    - System 2, Arihant Business System: Owner, Sales, Accounts, Godown (Quick Quote, enquiries, orders and dispatch, stock and purchases, billing and credit, owner's dashboard, settings).
    - System 3, WhatsApp AI assistant (scripted chat that saves a lead into the enquiry inbox).
 
-Demo changes are kept in the browser (localStorage) until **Reset demo** is clicked.
+Demo changes are kept in the browser (localStorage) until **Start over** is clicked. The website marketplace and the demo share this data, so an order or a seller's change on the website shows in the demo, live across tabs. Orders for Arihant's own stock also land in the demo's Enquiries.
+
+The demo has a guided tour (driver.js): **Take the tour** in the demo header, either a walk through the whole demo or a guide to the current screen. It only runs when clicked.
 
 ## Run
 

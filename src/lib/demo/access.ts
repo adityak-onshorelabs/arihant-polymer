@@ -13,7 +13,7 @@ export const modules = [
   { id: "billing", group: "team", href: "/demo/office/billing", label: "Payments", match: ["/demo/office/billing"] },
   { id: "buyers", group: "team", href: "/demo/office/buyers", label: "Buyers", match: ["/demo/office/buyers"] },
   { id: "website", group: "online", href: "/demo/website", label: "Your website", match: ["/demo/website"] },
-  { id: "search", group: "online", href: "/demo/market", label: "Marketplace", match: ["/demo/market", "/demo/market/requirements", "/demo/market/seller", "/demo/market/admin"] },
+  { id: "search", group: "online", href: "/demo/market", label: "Marketplace", match: ["/demo/market"] },
   { id: "whatsapp", group: "online", href: "/demo/whatsapp", label: "WhatsApp assistant", match: ["/demo/whatsapp"] },
   { id: "settings", group: "bottom", href: "/demo/office/settings", label: "Settings", match: ["/demo/office/settings"] },
 ] as const;
@@ -47,10 +47,10 @@ export const roleInfo: Record<Role, { label: string; who: string; system: "offic
   sales: { label: "Sales", who: "Rohit", short: "Rohit", system: "office", home: "/demo/office/quote" },
   accounts: { label: "Accounts", who: "Meena", short: "Meena", system: "office", home: "/demo/office/billing" },
   godown: { label: "Godown", who: "Santosh", short: "Santosh", system: "office", home: "/demo/office/dispatch" },
-  visitor: { label: "Visitor", who: "Anyone", short: "Visitor", system: "market", home: "/demo/website" },
-  buyer: { label: "Buyer", who: "Shree Ganesh Moulders", short: "Buyer", system: "market", home: "/demo/market" },
-  seller: { label: "Seller", who: "Shah Petrochem", short: "Seller", system: "market", home: "/demo/market/seller" },
-  admin: { label: "Arihant admin", who: "Arihant team", short: "Admin", system: "market", home: "/demo/market/admin" },
+  visitor: { label: "Visitor", who: "Anyone", short: "Visitor", system: "market", home: "/marketplace" },
+  buyer: { label: "Buyer", who: "Shree Ganesh Moulders", short: "Buyer", system: "market", home: "/marketplace" },
+  seller: { label: "Seller", who: "Shah Petrochem", short: "Seller", system: "market", home: "/marketplace/sell" },
+  admin: { label: "Arihant admin", who: "Arihant team", short: "Admin", system: "market", home: "/demo/market" },
 };
 
 export const TEAM: OfficeRole[] = ["owner", "sales", "accounts", "godown"];
