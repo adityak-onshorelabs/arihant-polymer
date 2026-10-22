@@ -1,26 +1,224 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
+/* Concept: the printed 25 kg polymer bag. See DESIGN.md. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --print: oklch(52% 0.19 29);
+  --print-deep: oklch(41% 0.15 29);
+  --print-tint: oklch(94% 0.03 40);
+  --sack: oklch(97.6% 0.008 85);
+  --sack-2: oklch(94.2% 0.013 85);
+  --sack-3: oklch(90.5% 0.016 80);
+  --seam: oklch(82% 0.025 60);
+  --ink: oklch(24% 0.02 35);
+  --ink-2: oklch(44% 0.02 35);
+  --on-print: oklch(97.6% 0.01 60);
+  --ok: oklch(46% 0.11 150);
+  --warn: oklch(50% 0.12 70);
+
+  /* family bands */
+  --fam-pp: var(--print);
+  --fam-hdpe: oklch(48% 0.12 255);
+  --fam-lldpe: oklch(50% 0.11 150);
+  --fam-ldpe: oklch(58% 0.12 75);
+  --fam-styrenics: oklch(45% 0.1 330);
+  --fam-pvc: oklch(45% 0.03 250);
+  --fam-pet: oklch(50% 0.08 200);
+  --fam-engg: oklch(45% 0.06 55);
+  --fam-additive: oklch(55% 0.01 60);
+
+  /* shadcn mapping */
+  --background: var(--sack);
+  --foreground: var(--ink);
+  --card: var(--sack);
+  --card-foreground: var(--ink);
+  --popover: var(--sack);
+  --popover-foreground: var(--ink);
+  --primary: var(--print);
+  --primary-foreground: var(--on-print);
+  --secondary: var(--sack-2);
+  --secondary-foreground: var(--ink);
+  --muted: var(--sack-2);
+  --muted-foreground: var(--ink-2);
+  --accent: var(--print-tint);
+  --accent-foreground: var(--print-deep);
+  --destructive: oklch(50% 0.19 25);
+  --border: var(--seam);
+  --input: var(--seam);
+  --ring: var(--print);
+  --radius: 0.125rem;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-print: var(--print);
+  --color-print-deep: var(--print-deep);
+  --color-print-tint: var(--print-tint);
+  --color-sack: var(--sack);
+  --color-sack-2: var(--sack-2);
+  --color-sack-3: var(--sack-3);
+  --color-seam: var(--seam);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-on-print: var(--on-print);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+
+  --font-sans: var(--font-hanken);
+  --font-display: var(--font-shoulders);
+  --font-stencil: var(--font-stencil-face);
+  --font-heading: var(--font-shoulders);
+
+  --radius-sm: 0.0625rem;
+  --radius-md: 0.125rem;
+  --radius-lg: 0.125rem;
+  --radius-xl: 0.25rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border outline-ring/60;
+  }
+  html {
+    @apply font-sans;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    font-variant-numeric: tabular-nums;
+  }
+  :focus-visible {
+    outline: 3px solid var(--print);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--print);
+    color: var(--on-print);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+/* ---- type roles ---- */
+.t-display {
+  font-family: var(--font-shoulders);
+  font-weight: 800;
+  font-variation-settings: "opsz" 72;
+  text-transform: uppercase;
+  font-size: clamp(3rem, 8.4vw, 7.5rem);
+  line-height: 0.88;
+  letter-spacing: -0.005em;
+}
+.t-h2 {
+  font-family: var(--font-shoulders);
+  font-weight: 800;
+  font-variation-settings: "opsz" 60;
+  text-transform: uppercase;
+  font-size: clamp(2.2rem, 4.6vw, 3.75rem);
+  line-height: 0.95;
+}
+.t-h3 {
+  font-family: var(--font-shoulders);
+  font-weight: 700;
+  font-variation-settings: "opsz" 40;
+  text-transform: uppercase;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+.t-code {
+  font-family: var(--font-stencil-face);
+  font-weight: 800;
+  font-variation-settings: "opsz" 72;
+  text-transform: uppercase;
+  line-height: 0.9;
+  letter-spacing: 0.01em;
+}
+.t-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.t-lead {
+  font-size: clamp(1.125rem, 1.6vw, 1.3rem);
+  line-height: 1.5;
+}
+
+/* ---- layout ---- */
+.frame {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+@media (min-width: 768px) {
+  .frame {
+    padding-inline: 2rem;
+  }
+}
+
+/* ---- concept utilities ---- */
+/* stitched seam, like the sewn top of a sack */
+.seam {
+  border: 0;
+  height: 0;
+  border-top: 2px dashed var(--seam);
+}
+.seam-print {
+  border-top-color: color-mix(in oklch, var(--on-print) 55%, transparent);
+}
+/* woven polypropylene sack texture */
+.weave {
+  background-color: var(--sack-2);
+  background-image:
+    repeating-linear-gradient(0deg, color-mix(in oklch, var(--sack-3) 70%, transparent) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, color-mix(in oklch, var(--sack-3) 55%, transparent) 0 1px, transparent 1px 4px);
+}
+.weave-print {
+  background-color: var(--print);
+  background-image:
+    repeating-linear-gradient(0deg, color-mix(in oklch, var(--print-deep) 35%, transparent) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, color-mix(in oklch, var(--print-deep) 25%, transparent) 0 1px, transparent 1px 4px);
+}
+
+.fam-PP { --fam: var(--fam-pp); }
+.fam-HDPE { --fam: var(--fam-hdpe); }
+.fam-LLDPE { --fam: var(--fam-lldpe); }
+.fam-LDPE { --fam: var(--fam-ldpe); }
+.fam-STYRENICS { --fam: var(--fam-styrenics); }
+.fam-PVC { --fam: var(--fam-pvc); }
+.fam-PET { --fam: var(--fam-pet); }
+.fam-ENGG { --fam: var(--fam-engg); }
+.fam-ADDITIVE { --fam: var(--fam-additive); }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
