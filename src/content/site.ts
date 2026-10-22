@@ -88,7 +88,28 @@ export const reviews = {
 export const reviewStates = Array.from(new Set(reviews.recent.map((r) => r.city.split(", ")[1])));
 
 export const photos = {
-  sacks: { src: "/images/photos/sacks-stacked.jpg", alt: "Pallets of white polymer sacks stacked three high against a grey wall", placeholder: true },
-  pallets: { src: "/images/photos/bags-pallets.jpg", alt: "Two pallets of woven sacks waiting to load outside a godown", placeholder: true },
-  truck: { src: "/images/photos/truck-bags.jpg", alt: "A loaded truck with white sacks stacked inside, the driver resting on the tailgate", placeholder: true },
+  godown: { src: "/images/arihant/godown.jpg", alt: "Inside Arihant's godown in Malad: 25 kg polymer sacks stacked along the wall", placeholder: false },
+  office: { src: "/images/arihant/office.jpg", alt: "Arihant Polymer's office in Malad West", placeholder: false },
+  building: { src: "/images/arihant/building.jpg", alt: "The entrance to Arihant Polymer at Sonal Heavy Industrial Estate, Kachpada, Malad West", placeholder: false },
+} as const;
+
+/** From the About Us and factsheet on arihantpolymer.in, rewritten plainly. */
+export const about = {
+  intro: [
+    "Arihant Polymer has been a wholesale trader and distributor of plastic granules since 1991: PP injection moulding grades, HDPE film, LLDPE film, PP impact copolymer, HDPE raffia and much more.",
+    "The firm works to meet each customer's needs with the right material, and keeps its dealings straightforward and transparent, so that relationships with buyers last.",
+  ],
+  whyUs: ["Timely delivery", "Quality-proven range", "Wide distribution network", "Long experience in the trade", "Options to suit the buyer's need"],
+  team: ["Engineers", "Quality analysts", "Technicians", "Skilled and semi-skilled workforce", "Sales and marketing executives"],
+  teamNote: "The team stays in constant touch with customers to understand exactly what they need.",
+  brands: ["Relene", "Propel", "Mangpol", "GAIL", "Oplene"],
+  additional: ["Retail", "Wholesale", "Warehouse and depot"],
+  employees: "Up to 10 people",
+} as const;
+
+/** Terms most listings on the old site carry. */
+export const terms = {
+  moq: "500 kg",
+  delivery: "2 to 3 days",
+  pack: "25 kg bag (goni), about 3 ft by 1.5 ft",
 } as const;

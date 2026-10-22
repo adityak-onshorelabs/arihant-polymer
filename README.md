@@ -2,7 +2,7 @@
 
 Two things in one Next.js app, built by Onshore Labs:
 
-1. **The website** (`/`, `/products`, `/products/[grade]`, `/about`, `/reviews`, `/contact`): Arihant Polymer's own site, rebuilt from the content of its IndiaMART-hosted listing (arihantpolymer.in). 87 real grades from 30 producers, searchable, with a rate request on every grade.
+1. **The website** (`/`, `/products`, `/products/[grade]`, `/about`, `/reviews`, `/contact`): Arihant Polymer's own site, rebuilt from the content of its IndiaMART-hosted listing (arihantpolymer.in). 236 real grades crawled from every category page (spec tables, descriptions, minimum order, packing, delivery) with Arihant's own photos, searchable, with a rate request on every grade.
 2. **The platform demo** (`/demo`): a clickable, front-end-only demo of the three systems in the proposal, with role-based access and **invented sample data**:
    - System 1, Website and Marketplace: Visitor, Buyer, Seller, Arihant admin.
    - System 2, Arihant Business System: Owner, Sales, Accounts, Godown (Quick Quote, enquiries, orders and dispatch, stock and purchases, billing and credit, owner's dashboard, settings).
@@ -33,7 +33,9 @@ Copy `.env.example` to `.env.local`. Locally, `ENQUIRY_LOG_ONLY=1` makes rate re
 | What | File |
 |---|---|
 | Company facts, reviews, photos | `src/content/site.ts` |
-| Product register (87 grades) | `src/content/catalogue.ts` |
+| Product register (236 grades, generated data) | `src/content/catalogue.data.json`, typed in `src/content/catalogue.ts` |
+| Product photos (Arihant's own, from the old site) | `public/images/products/` |
+| Godown, office and building photos | `public/images/arihant/` |
 | Website pages | `src/app/(site)/` |
 | Site components (bag face, lookup, register, form) | `src/components/site/` |
 | Rate request API | `src/app/api/enquiry/route.ts`, `src/lib/enquiry.ts` |
@@ -47,8 +49,8 @@ Copy `.env.example` to `.env.local`. Locally, `ENQUIRY_LOG_ONLY=1` makes rate re
 - **Direct phone number.** 080 4730 5878 is the number on the IndiaMART listing.
 - **WhatsApp number and email** (none published). WhatsApp buttons are left out until we have the number.
 - **Logo.** The wordmark is typeset in Big Shoulders Stencil, not Arihant's mark.
-- **Photos.** All three photos are Unsplash stock, tagged "Placeholder photo" on the page. Replace with Arihant's godown, stock and trucks.
-- **Grade list.** Confirm the 87 grades are current; the old site's categories were tidied and three duplicates merged.
+- **Photos.** All photos are Arihant's own, taken from the old IndiaMART site (product bags and granules, godown, office, building). Newer or higher-resolution shots would help the hero.
+- **Grade list.** Confirm the 236 grades are current. Codes, producers, polymer family and process were derived from the listed names and spec tables.
 - **Prices.** None shown (the old site's Rs 100/kg is a placeholder).
 - **Turnover** (IndiaMART says Rs 100 to 500 Cr) is deliberately not shown.
 - **Resend** (or another mail service) keys and the inbox for rate requests; remove `ENQUIRY_LOG_ONLY`.

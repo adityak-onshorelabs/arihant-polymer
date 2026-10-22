@@ -118,7 +118,14 @@ export function StockRegister({ grades, initialFamily, initialQuery }: { grades:
                   const slug = gradeSlug(g);
                   return (
                     <li key={slug} className="grid grid-cols-[auto_1fr_auto] items-center gap-x-4 gap-y-1 border-b border-seam py-3 md:grid-cols-[auto_9rem_10rem_1fr_7rem_auto]">
-                      <FamilySwatch family={g.family} />
+                      {g.images[0] ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={g.images[0].src} alt="" width={56} height={56} loading="lazy" className="row-span-3 size-14 border border-seam object-cover md:row-span-1" />
+                      ) : (
+                        <span className="row-span-3 flex size-14 items-center justify-center border border-seam md:row-span-1">
+                          <FamilySwatch family={g.family} />
+                        </span>
+                      )}
                       <Link href={`/products/${slug}`} className="t-code text-2xl text-print hover:underline md:text-[1.7rem]">
                         {gradeTitle(g)}
                       </Link>

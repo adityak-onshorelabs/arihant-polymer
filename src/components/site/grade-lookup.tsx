@@ -167,7 +167,16 @@ export function GradeLookup({ grades, initial }: { grades: Grade[]; initial: Gra
             exit={reduce ? undefined : { opacity: 0 }}
             transition={{ duration: reduce ? 0 : 0.45, ease: [0.16, 1, 0.3, 1] }}
           >
-            <BagFace grade={picked} size="lg" />
+            <div className={picked.images[0] ? "grid gap-3 sm:grid-cols-[minmax(0,1fr)_11rem]" : ""}>
+              <BagFace grade={picked} size="lg" />
+              {picked.images[0] && (
+                <Link href={`/products/${slug}`} className="group relative hidden overflow-hidden border-2 border-ink bg-sack-2 sm:block">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={picked.images[0].src} alt={`${title} bag in Arihant's godown`} className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+                  <span className="absolute inset-x-0 bottom-0 bg-ink/80 px-2 py-1 text-xs font-semibold text-sack">In the godown</span>
+                </Link>
+              )}
+            </div>
           </motion.div>
         </AnimatePresence>
         <div className="mt-4 flex flex-col gap-3 sm:flex-row">

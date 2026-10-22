@@ -57,7 +57,7 @@ export function BagFace({ grade, size = "md", className }: { grade: Grade; size?
           </div>
           <div className="py-2 ps-3">
             <dt className="t-label text-ink-2">Pack</dt>
-            <dd className="mt-0.5 font-semibold">Producer bag</dd>
+            <dd className="mt-0.5 font-semibold">{grade.packing && /25\s*kg/i.test(grade.packing) ? "25 kg bag" : "Producer bag"}</dd>
           </div>
         </dl>
       </div>

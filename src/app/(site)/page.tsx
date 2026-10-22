@@ -2,14 +2,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Phone } from "lucide-react";
 import { families, grades, producersByCount } from "@/content/catalogue";
-import { YEAR, company, photos, reviews, reviewStates } from "@/content/site";
+import { YEAR, company, photos, reviews, reviewStates, terms } from "@/content/site";
 import { GradeLookup } from "@/components/site/grade-lookup";
 import { FamilySwatch } from "@/components/site/bag-face";
-import { PlaceholderTag } from "@/components/site/chrome";
 import { SectionHead } from "@/components/site/section-head";
 import { Reveal } from "@/components/site/reveal";
 
 const featured = grades.find((g) => g.code === "MI3530")!;
+const showcase = ["mi3530-reliance", "f52h04-opal", "t50a010a-gail", "f0120l-hmel"]
+  .map((s) => grades.find((g) => g.slug === s))
+  .filter((g): g is (typeof grades)[number] => Boolean(g && g.images.length));
 
 export default function HomePage() {
   const famCounts = families
@@ -31,7 +33,7 @@ export default function HomePage() {
               And the rest.
             </h1>
             <p className="t-lead mt-6 max-w-xl">
-              Polymer granules from Reliance, GAIL, IOCL, HMEL, OPaL, Haldia and more, traded out of Malad West for {YEAR - company.since} years. Tell us the grade, get a rate.
+              Polymer granules from Reliance, GAIL, IOCL, HMEL, OPaL, Borouge and more, traded out of Malad West for {YEAR - company.since} years. Minimum order {terms.moq}, delivery in {terms.delivery}.
             </p>
           </div>
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
@@ -46,8 +48,8 @@ export default function HomePage() {
           </div>
         </div>
         <div className="relative min-h-72 lg:col-span-5 lg:min-h-0">
-          <Image src={photos.sacks.src} alt={photos.sacks.alt} fill priority sizes="(min-width: 1024px) 42vw, 100vw" className="object-cover" />
-          {photos.sacks.placeholder && <PlaceholderTag />}
+          <Image src={photos.godown.src} alt={photos.godown.alt} fill priority sizes="(min-width: 1024px) 42vw, 100vw" className="object-cover" />
+          <span className="absolute bottom-3 start-3 bg-ink/80 px-2 py-1 text-xs font-semibold text-sack">Arihant&apos;s godown, Malad</span>
         </div>
       </section>
 
@@ -81,10 +83,19 @@ export default function HomePage() {
           <SectionHead no="02" label="Stock register" title={<span id="register-title">{grades.length} grades across {famCounts.length} polymer families.</span>}>
             Commodity grades for moulding, film, raffia, blow moulding and pipe, plus styrenics, PVC, PET and engineering resins.
           </SectionHead>
-          <div className="relative mt-10 hidden aspect-[4/5] lg:block">
-            <Image src={photos.pallets.src} alt={photos.pallets.alt} fill sizes="35vw" className="object-cover" />
-            {photos.pallets.placeholder && <PlaceholderTag />}
-          </div>
+          <ul className="mt-10 grid grid-cols-2 gap-2">
+            {showcase.map((g) => (
+              <li key={g.slug}>
+                <Link href={`/products/${g.slug}`} className="group block">
+                  <span className="relative block aspect-square overflow-hidden border border-seam bg-sack-2">
+                    <Image src={g.images[0].src} alt={`${g.code} ${g.producer} bag in Arihant's godown`} fill sizes="(min-width: 1024px) 18vw, 45vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+                  </span>
+                  <span className="t-code mt-1 block text-xl text-print">{g.code}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-sm text-ink-2">Photos from Arihant&apos;s godown.</p>
         </div>
         <Reveal className="lg:col-span-7">
           <ul className="border-t-2 border-ink">
@@ -137,8 +148,8 @@ export default function HomePage() {
               ["Constitution", company.legal],
               ["Business", "Trader, distributor"],
               ["Facility", "Warehouse and depot"],
-              ["Dispatch", company.shipping],
-              ["GST", company.gst],
+              ["Minimum order", terms.moq],
+              ["Delivery", terms.delivery],
             ].map(([k, v]) => (
               <div key={k} className="border-b border-seam py-4 pe-4">
                 <dt className="t-label text-ink-2">{k}</dt>
@@ -168,9 +179,8 @@ export default function HomePage() {
 
       {/* Closing CTA */}
       <section className="relative isolate overflow-hidden border-t-2 border-ink" aria-labelledby="cta-title">
-        <Image src={photos.truck.src} alt="" fill sizes="100vw" className="-z-10 object-cover" />
-        <div className="absolute inset-0 -z-10 bg-ink/75" aria-hidden />
-        {photos.truck.placeholder && <PlaceholderTag />}
+        <Image src={photos.office.src} alt="" fill sizes="100vw" className="-z-10 object-cover" />
+        <div className="absolute inset-0 -z-10 bg-ink/80" aria-hidden />
         <div className="frame py-20 text-sack md:py-28">
           <h2 id="cta-title" className="t-h2 max-w-3xl">Tell us the grade and the quantity. We&apos;ll come back with a rate.</h2>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
