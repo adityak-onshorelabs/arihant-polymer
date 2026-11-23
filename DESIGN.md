@@ -110,7 +110,7 @@ Voice is the label's: grade, producer, quantity, days. No adjectives doing the s
 **GSAP everywhere, with Lenis smooth scroll on GSAP's ticker** (`SmoothScroll` in the site layout; the user asked for "GSAP smoothness all over the website" on 23 Nov 2026). Lenis keeps `position: sticky` working, unlike ScrollSmoother. Scrollable inner areas carry `data-lenis-prevent`. Easing is expo-out and nothing bounces. Motion follows the material:
 
 - **Pour (pure CSS, replays on remount):** a heap falls in as up to 6 pre-drawn layers, bottom first (`.drop-layer`), then the label presses on (`.press-on`). Never animate individual pellets: that repaints the whole SVG every frame and made scrolling stutter. `PourOnView` holds the pour until the block is on screen (the about tray, the review pouches).
-- **Settle:** headings and blocks drop a few pixels from above and come to rest. Hero words use `SettleWords` (CSS); sections use `Settle` (GSAP ScrollTrigger, once). Every page also settles in on client navigation (`(site)/template.tsx`, skipped on first load).
+- **Settle:** headings and blocks drop a few pixels from above and come to rest. Hero words use `SettleWords` (CSS); sections use `Settle` (GSAP ScrollTrigger, once). Client navigations go through the page-to-page loader (section 6a).
 - **Drift:** photos slide slowly inside their pouch windows (`DriftImage`, scrubbed, loaded eagerly so decoding never lands mid-scroll). The process strip only settles in once; nested scrubbed transforms there read as lag.
 - **Disperse:** the rubine band's clip-path grows from an oval pellet, scrubbed (`DoseBand`).
 - **Small moves:**
@@ -134,6 +134,13 @@ Banned here: magnetic buttons, tilt cards, tickers, count-up stat strips, pinned
   - Pure CSS and server-rendered, so it shows on first paint without waiting for JavaScript.
   - Plays once per session (`intro-seen` on `<html>`, set by an inline script and by `IntroClock`). Never shown under reduced motion.
   - Page entrances wait for it through `--intro`.
+- **Page-to-page loader** (`motion/page-transition.tsx`):
+  - Clicking an internal link raises a pouch-film panel from the bottom, with seal ribs leading.
+  - A sample pouch sits in the centre, a rubine pellet drops in, and a label names the destination ("Products", "About", or the grade code).
+  - The route changes behind it, then the panel lifts away upward.
+  - New-page entrances wait for the lift (`html.is-entering` sets `--intro`).
+  - Transforms only.
+  - Skipped for same-page, filter, hash, new-tab and external links, and under reduced motion.
 - **No browser scrollbar** on the site (`html:has(.site)`). A slim graphite pellet on the right edge (`ScrollPellet`) shows position while scrolling and fades when still.
 
 ## 6b. Imagery

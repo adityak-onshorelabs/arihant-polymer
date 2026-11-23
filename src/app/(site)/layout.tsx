@@ -3,6 +3,7 @@ import { company } from "@/content/site";
 import { SmoothScroll } from "@/components/site/motion/smooth-scroll";
 import { ScrollPellet } from "@/components/site/motion/scroll-pellet";
 import { IntroClock } from "@/components/site/motion/intro-clock";
+import { PageTransition } from "@/components/site/motion/page-transition";
 import { Loader, introScript } from "@/components/site/loader";
 
 const jsonLd = {
@@ -32,6 +33,7 @@ export default function SiteLayout({ children }: LayoutProps<"/">) {
       <IntroClock />
       <SmoothScroll />
       <ScrollPellet />
+      <PageTransition />
       <SiteHeader />
       <main id="main" tabIndex={-1} className="flex-1 outline-none">
         {children}
