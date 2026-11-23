@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { YEAR, company, nav } from "@/content/site";
 import { MobileMenu } from "./mobile-menu";
+import { NavLinks } from "./nav-links";
 import { HeaderShell } from "./motion/header-shell";
 import { btnPrimary } from "./ui";
 
@@ -28,15 +29,7 @@ export function SiteHeader() {
           <Wordmark />
         </Link>
         <nav aria-label="Main" className="hidden items-center gap-1 lg:flex">
-          {nav.map((n) => (
-            <Link
-              key={n.href}
-              href={n.href}
-              className="flex min-h-11 items-center px-3.5 text-[0.95rem] font-medium text-graphite-2 transition-colors hover:text-graphite"
-            >
-              {n.label}
-            </Link>
-          ))}
+          <NavLinks items={nav} />
           <Link href="/contact" className={`${btnPrimary} ms-4 min-h-11 px-5 text-sm`}>
             Send an enquiry
           </Link>
