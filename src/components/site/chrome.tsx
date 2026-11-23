@@ -1,91 +1,105 @@
 import Link from "next/link";
-import { Store } from "lucide-react";
 import { YEAR, company, nav } from "@/content/site";
 import { MobileMenu } from "./mobile-menu";
+import { HeaderShell } from "./motion/header-shell";
+import { btnPrimary } from "./ui";
 
-export function Wordmark({ onPrint = false }: { onPrint?: boolean }) {
+export function Wordmark() {
   return (
-    <span className="flex items-baseline gap-2 leading-none">
-      <span className={`t-code text-[1.9rem] ${onPrint ? "text-on-print" : "text-print"}`}>Arihant</span>
-      <span className={`t-label ${onPrint ? "text-on-print" : "text-ink"}`}>Polymer</span>
+    <span className="flex items-center gap-2 text-[1.2rem] leading-none tracking-[-0.03em]">
+      <span className="pellet" aria-hidden />
+      <span className="font-semibold text-graphite">Arihant</span>
+      <span className="-ms-0.5 font-normal text-graphite-2">Polymer</span>
     </span>
   );
 }
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b-2 border-ink bg-sack">
-      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:start-4 focus:top-3 focus:z-50 focus:bg-print focus:px-4 focus:py-2 focus:text-on-print">
+    <HeaderShell>
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:start-4 focus:top-3 focus:z-50 focus:rounded-full focus:bg-graphite focus:px-4 focus:py-2 focus:text-label"
+      >
         Skip to content
       </a>
-      <div className="frame flex h-16 items-center justify-between gap-6">
+      <div className="frame flex h-[4.5rem] items-center justify-between gap-6">
         <Link href="/" aria-label={`${company.name}, home`} className="flex min-h-11 items-center">
           <Wordmark />
         </Link>
         <nav aria-label="Main" className="hidden items-center gap-1 lg:flex">
           {nav.map((n) => (
-            <Link key={n.href} href={n.href} className="flex min-h-11 items-center px-3 font-semibold hover:text-print">
+            <Link
+              key={n.href}
+              href={n.href}
+              className="flex min-h-11 items-center px-3.5 text-[0.95rem] font-medium text-graphite-2 transition-colors hover:text-graphite"
+            >
               {n.label}
             </Link>
           ))}
-          <Link href="/demo" className="ms-2 hidden min-h-11 items-center px-3 text-sm font-semibold text-ink-2 hover:text-print xl:flex">
-            Platform demo
-          </Link>
-          <Link href="/marketplace" className="ms-3 inline-flex min-h-11 items-center gap-2 border-2 border-ink px-3 font-semibold hover:bg-ink hover:text-sack">
-            <Store aria-hidden className="size-4" />
-            Marketplace
-          </Link>
-          <Link href="/contact" className="ms-2 inline-flex min-h-11 items-center bg-print px-4 font-semibold text-on-print hover:bg-print-deep">
-            Request a rate
+          <Link href="/contact" className={`${btnPrimary} ms-4 min-h-11 px-5 text-sm`}>
+            Send an enquiry
           </Link>
         </nav>
-        <MobileMenu items={[...nav, { href: "/marketplace", label: "Marketplace" }, { href: "/marketplace/sell", label: "Seller login" }, { href: "/demo", label: "Platform demo" }]} />
+        <MobileMenu items={nav} />
       </div>
-    </header>
+    </HeaderShell>
   );
 }
 
 export function SiteFooter() {
   return (
-    <footer className="weave-print mt-auto text-on-print">
-      <div className="frame py-14">
-        <div className="grid gap-10 md:grid-cols-12">
+    <footer className="mt-auto overflow-hidden bg-film">
+      <div className="seal" aria-hidden />
+      <div className="frame pb-10 pt-16 md:pt-20">
+        <div className="grid gap-12 md:grid-cols-12">
           <div className="md:col-span-5">
-            <Wordmark onPrint />
-            <p className="mt-4 max-w-sm">
-              Polymer granules stockist and distributor, {company.address.short}. Since {company.since}.
+            <Wordmark />
+            <p className="mt-4 max-w-xs text-graphite-2">
+              Polymer granules stockist and distributor in {company.address.short}, since {company.since}.
             </p>
           </div>
           <div className="md:col-span-4">
-            <p className="t-label">Godown and office</p>
-            <address className="mt-2 not-italic">
+            <p className="meta">Godown and office</p>
+            <address className="mt-3 not-italic leading-relaxed">
               {company.address.lines.map((l) => (
                 <span key={l} className="block">
                   {l}
                 </span>
               ))}
             </address>
-            <a href={company.address.mapsUrl} className="mt-2 inline-block font-semibold underline underline-offset-4" target="_blank" rel="noreferrer">
+            <a
+              href={company.address.mapsUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-2 inline-flex min-h-11 items-center font-medium underline decoration-rim/60 underline-offset-[6px] hover:decoration-graphite"
+            >
               Directions
             </a>
           </div>
           <div className="md:col-span-3">
-            <p className="t-label">Contact</p>
-            <p className="mt-2">{company.contactPerson}</p>
-            <a href={`tel:${company.phone.tel}`} className="mt-1 block text-2xl font-bold">
+            <p className="meta">Contact</p>
+            <p className="mt-3">{company.contactPerson}</p>
+            <a href={`tel:${company.phone.tel}`} className="mt-1 inline-flex min-h-11 items-center text-xl font-medium tracking-[-0.01em]">
               {company.phone.display}
             </a>
-            <p className="mt-4 text-sm">GST {company.gst}</p>
+            <ul className="mt-4 space-y-1">
+              {nav.map((n) => (
+                <li key={n.href}>
+                  <Link href={n.href} className="inline-flex min-h-9 items-center text-graphite-2 hover:text-graphite">
+                    {n.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
-        <hr className="seam seam-print mt-12" />
-        <div className="mt-5 flex flex-wrap justify-between gap-3 text-sm">
-          <span>© {YEAR} {company.name}</span>
-          <span className="flex flex-wrap gap-x-5 gap-y-2">
-            <Link href="/marketplace/sell" className="underline underline-offset-4">
-              Seller login
-            </Link>
-            <Link href="/demo" className="underline underline-offset-4">
+        <div className="mt-16 flex flex-wrap justify-between gap-x-6 gap-y-3 border-t border-seal pt-6 text-sm text-graphite-2">
+          <span>
+            © {YEAR} {company.name} · GST {company.gst}
+          </span>
+          <span className="flex flex-wrap gap-x-6 gap-y-2">
+            <Link href="/demo" className="hover:text-graphite">
               Platform demo
             </Link>
             <span>Website by Onshore Labs</span>
@@ -98,7 +112,7 @@ export function SiteFooter() {
 
 export function PlaceholderTag() {
   return (
-    <span className="absolute end-2 top-2 z-10 bg-ink/80 px-2 py-1 text-[0.7rem] font-semibold uppercase tracking-wider text-sack">
+    <span className="absolute end-3 top-3 z-10 rounded-full bg-label/90 px-3 py-1 text-xs font-medium text-graphite-2">
       Placeholder photo
     </span>
   );

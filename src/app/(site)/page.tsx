@@ -1,199 +1,217 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Phone } from "lucide-react";
-import { families, grades, producersByCount } from "@/content/catalogue";
-import { YEAR, company, photos, reviews, reviewStates, terms } from "@/content/site";
-import { GradeLookup } from "@/components/site/grade-lookup";
-import { FamilySwatch } from "@/components/site/bag-face";
+import { families, familyLook, gradeTitle, grades, producersByCount } from "@/content/catalogue";
+import { YEAR, company, photos, reviews, reviewStates } from "@/content/site";
+import { GradeSample } from "@/components/site/grade-lookup";
+import { FamilyRows, type FamilyRow } from "@/components/site/family-rows";
+import { DoseBand } from "@/components/site/dose-band";
+import { UsesStrip } from "@/components/site/uses-strip";
+import { uses } from "@/content/uses";
+import { Pouch } from "@/components/site/pouch";
 import { SectionHead } from "@/components/site/section-head";
-import { Reveal } from "@/components/site/reveal";
+import { SettleWords } from "@/components/site/rise";
+import { Settle } from "@/components/site/motion/effects";
+import { DriftImage } from "@/components/site/motion/drift-image";
+import { btnOnDose, btnOnDoseSecondary, textLink } from "@/components/site/ui";
 
 const featured = grades.find((g) => g.code === "MI3530")!;
-const showcase = ["mi3530-reliance", "f52h04-opal", "t50a010a-gail", "f0120l-hmel"]
-  .map((s) => grades.find((g) => g.slug === s))
-  .filter((g): g is (typeof grades)[number] => Boolean(g && g.images.length));
 
 export default function HomePage() {
-  const famCounts = families
-    .map((f) => ({ ...f, count: grades.filter((g) => g.family === f.id).length }))
+  const years = YEAR - company.since;
+  const famRows: FamilyRow[] = families
+    .map((f) => {
+      const list = grades.filter((g) => g.family === f.id);
+      const prod = new Map<string, number>();
+      for (const g of list) if (g.producer) prod.set(g.producer, (prod.get(g.producer) ?? 0) + 1);
+      return {
+        id: f.id,
+        short: f.short,
+        label: f.label,
+        count: list.length,
+        look: familyLook[f.id],
+        producers: [...prod.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6).map(([name, count]) => ({ name, count })),
+        top: list
+          .filter((g) => g.code)
+          .slice(0, 6)
+          .map((g) => ({ slug: g.slug, code: gradeTitle(g), producer: g.producer ?? "Generic" })),
+      };
+    })
     .filter((f) => f.count > 0);
 
   return (
     <>
-      {/* Hero: committed vermilion slab + stacked sacks */}
-      <section className="grid lg:grid-cols-12" aria-labelledby="hero-title">
-        <div className="weave-print relative flex flex-col justify-between px-4 pb-10 pt-12 text-on-print md:px-8 lg:col-span-7 lg:px-12 lg:pb-14 lg:pt-20">
-          <div>
-            <p className="t-label">Stockist and distributor · {company.address.short} · Since {company.since}</p>
-            <h1 id="hero-title" className="t-display mt-5">
-              PP. HDPE.
-              <br />
-              LLDPE.
-              <br />
-              And the rest.
-            </h1>
-            <p className="t-lead mt-6 max-w-xl">
-              Polymer granules from Reliance, GAIL, IOCL, HMEL, OPaL, Borouge and more, traded out of Malad West for {YEAR - company.since} years. Minimum order {terms.moq}, delivery in {terms.delivery}.
+      {/* Hero and the signature: grade, then how much */}
+      <section className="frame pb-[clamp(4.5rem,10vw,8rem)] pt-10 md:pt-16" aria-labelledby="hero-title">
+        <GradeSample
+          grades={grades}
+          initial={featured}
+          heading={
+            <>
+              <p className="eyebrow settle" style={{ "--d": "0.05s" } as React.CSSProperties}>
+                Stockist and distributor · {company.address.short} · Since {company.since}
+              </p>
+              <h1 id="hero-title" className="d-hero mt-7 max-w-[14ch]">
+                <SettleWords text="Polymer granules, by the grade code." delay={0.1} />
+              </h1>
+            </>
+          }
+          intro={
+            <p className="lead settle mt-7 max-w-lg" style={{ "--d": "0.55s" } as React.CSSProperties}>
+              PP, HDPE, LLDPE, LDPE and more from Reliance, GAIL, IOCL, HMEL, OPaL and Borouge. Find your grade, say how much, and Arihant comes back with the rate.
             </p>
+          }
+        />
+      </section>
+
+      {/* Families */}
+      <section className="border-t border-seal bg-film/60" aria-labelledby="range-title">
+        <div className="frame section grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:sticky lg:top-28 lg:col-span-4 lg:self-start">
+            <SectionHead label="The range" title={<span id="range-title">{grades.length} grades across {famRows.length} families.</span>}>
+              Commodity grades for moulding, film, raffia, blow moulding and pipe, plus styrenics, PVC, PET and engineering resins.
+            </SectionHead>
+            <Settle delay={0.2}>
+              <Link href="/products" className={`${textLink} mt-6`}>
+                Browse all {grades.length} grades
+                <ArrowRight aria-hidden className="size-4 rtl:-scale-x-100" />
+              </Link>
+            </Settle>
           </div>
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-            <a href="#lookup" className="inline-flex min-h-13 items-center justify-between gap-6 bg-sack px-5 font-semibold text-print hover:bg-sack-2">
-              Find your grade
-              <ArrowRight aria-hidden className="size-5 rotate-90" />
-            </a>
-            <a href={`tel:${company.phone.tel}`} className="inline-flex min-h-13 items-center justify-center gap-2 border-2 border-on-print px-5 font-semibold hover:bg-on-print hover:text-print">
-              <Phone aria-hidden className="size-4" />
-              {company.phone.display}
-            </a>
+          <Settle className="min-w-0 lg:col-span-8">
+            <FamilyRows rows={famRows} />
+          </Settle>
+        </div>
+      </section>
+
+      {/* Where the granules go */}
+      <section className="frame overflow-x-clip pt-[clamp(4.5rem,10vw,8rem)]" aria-labelledby="uses-title">
+        <div className="mb-10 grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-end">
+          <SectionHead className="lg:col-span-7" label="Where the granules go" title={<span id="uses-title">Grades for the machine you run.</span>} />
+          <Settle className="lg:col-span-4 lg:col-start-9">
+            <p className="lead">Each listed grade names its process. Pick yours to see the grades for it.</p>
+          </Settle>
+        </div>
+        <UsesStrip items={uses} />
+        <p className="meta mt-4">Process photos: Unsplash. They show the process, not Arihant&apos;s customers.</p>
+      </section>
+
+      {/* Producers, as one printed label line */}
+      <section className="frame pt-[clamp(4.5rem,10vw,8rem)]" aria-labelledby="producers-title">
+        <Settle className="sticker overflow-hidden">
+          <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-dashed border-seal px-5 py-3 md:px-7">
+            <h2 id="producers-title" className="meta">
+              Grades stocked from
+            </h2>
+            <span className="meta tabular-nums">{producersByCount.length} producers</span>
+          </div>
+          <p className="px-5 py-5 text-[clamp(1.15rem,2.2vw,1.6rem)] leading-[1.5] tracking-[-0.02em] md:px-7 md:py-6">
+            {producersByCount.slice(0, 16).map((p, i) => (
+              <span key={p.name}>
+                <Link href={`/products?producer=${encodeURIComponent(p.name)}`} className="underline decoration-transparent underline-offset-[6px] transition-colors hover:decoration-graphite">
+                  {p.name}
+                </Link>
+                <sup className="ms-0.5 text-[0.55em] text-graphite-2 tabular-nums">{p.count}</sup>
+                {i < 15 ? <span className="text-seal"> / </span> : null}
+              </span>
+            ))}
+            <span className="text-graphite-2"> and {producersByCount.length - 16} more.</span>
+          </p>
+        </Settle>
+      </section>
+
+      {/* The firm: real photos, facts as a label, ratings */}
+      <section className="frame section grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16" aria-labelledby="who-title">
+        <Settle className="lg:col-span-5">
+          <Pouch windowClassName="aspect-[3/4]">
+            <DriftImage src={photos.godown.src} alt={photos.godown.alt} sizes="(min-width: 1024px) 28rem, 100vw" />
+          </Pouch>
+          <p className="meta mt-3">The godown, Malad West. Arihant&apos;s own photograph.</p>
+        </Settle>
+
+        <div className="min-w-0 lg:col-span-7">
+          <SectionHead label="The firm" title={<span id="who-title">A Malad partnership, trading granules for {years} years.</span>} />
+
+          <Settle className="sticker mt-10 overflow-hidden">
+            <dl className="grid grid-cols-2 gap-px bg-seal sm:grid-cols-3">
+              {[
+                ["Established", String(company.since)],
+                ["Constitution", company.legal],
+                ["Facility", "Warehouse and depot"],
+                ["Contact", company.contactPerson],
+                ["Dispatch", company.shipping],
+                ["GST", company.gst],
+              ].map(([k, v]) => (
+                <div key={k} className="min-w-0 bg-label px-5 py-4">
+                  <dt className="meta">{k}</dt>
+                  <dd className="mt-1 break-words font-medium">{v}</dd>
+                </div>
+              ))}
+            </dl>
+          </Settle>
+
+          <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] sm:items-end">
+            <Settle>
+              <p className="meta">Buyer ratings on {reviews.source}</p>
+              <p className="mt-3 flex items-baseline gap-2">
+                <span className="d-code text-[clamp(3.25rem,7vw,4.5rem)] leading-none">{reviews.average}</span>
+                <span className="text-lg text-graphite-2">/ 5 from {reviews.count} buyers</span>
+              </p>
+              <ul className="mt-5 space-y-1.5" aria-label="Rating distribution">
+                {reviews.distribution.map((d) => (
+                  <li key={d.stars} className="grid grid-cols-[3rem_minmax(0,1fr)_2.5rem] items-center gap-3 text-sm text-graphite-2">
+                    <span>{d.stars} star</span>
+                    <span className="h-1.5 overflow-hidden rounded-full bg-film-2" aria-hidden>
+                      <span className="block h-full rounded-full bg-graphite" style={{ width: `${d.pct}%` }} />
+                    </span>
+                    <span className="text-end tabular-nums">{d.pct}%</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-5 text-sm leading-relaxed text-graphite-2">
+                Recent buyers in {reviewStates.slice(0, 4).join(", ")} and {reviewStates.length - 4} more states.
+              </p>
+              <Link href="/reviews" className={`${textLink} mt-2 text-[0.95rem]`}>
+                Read the ratings
+                <ArrowRight aria-hidden className="size-4 rtl:-scale-x-100" />
+              </Link>
+            </Settle>
+            <Settle delay={0.15}>
+              <Pouch windowClassName="aspect-[4/3]">
+                <DriftImage src={photos.office.src} alt={photos.office.alt} sizes="(min-width: 1024px) 20rem, 100vw" />
+              </Pouch>
+              <p className="meta mt-3">Arihant&apos;s office, Malad West.</p>
+            </Settle>
           </div>
         </div>
-        <div className="relative min-h-72 lg:col-span-5 lg:min-h-0">
-          <Image src={photos.godown.src} alt={photos.godown.alt} fill priority sizes="(min-width: 1024px) 42vw, 100vw" className="object-cover" />
-          <span className="absolute bottom-3 start-3 bg-ink/80 px-2 py-1 text-xs font-semibold text-sack">Arihant&apos;s godown, Malad</span>
-        </div>
       </section>
 
-      {/* Producer ribbon */}
-      <div className="border-y-2 border-ink bg-sack-2">
-        <div className="frame flex flex-wrap items-center gap-x-6 gap-y-1 py-3">
-          <span className="t-label text-ink-2">On the register</span>
-          {producersByCount.slice(0, 9).map((p) => (
-            <span key={p.name} className="t-h3 text-[1.25rem]">
-              {p.name}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Signature: grade lookup */}
-      <section id="lookup" tabIndex={-1} className="frame scroll-mt-20 py-16 outline-none md:py-24" aria-labelledby="lookup-title">
-        <SectionHead no="01" label="Grade lookup" title={<span id="lookup-title">Have a grade code? Start there.</span>}>
-          Type a code, a producer or a process. The grade prints below, ready to send for a rate.
-        </SectionHead>
-        <div className="mt-10">
-          <GradeLookup grades={grades} initial={featured} />
-        </div>
-      </section>
-
-      <hr className="seam frame" />
-
-      {/* Register by family */}
-      <section className="frame grid gap-10 py-16 md:py-24 lg:grid-cols-12" aria-labelledby="register-title">
-        <div className="lg:col-span-5">
-          <SectionHead no="02" label="Stock register" title={<span id="register-title">{grades.length} grades across {famCounts.length} polymer families.</span>}>
-            Commodity grades for moulding, film, raffia, blow moulding and pipe, plus styrenics, PVC, PET and engineering resins.
-          </SectionHead>
-          <ul className="mt-10 grid grid-cols-2 gap-2">
-            {showcase.map((g) => (
-              <li key={g.slug}>
-                <Link href={`/products/${g.slug}`} className="group block">
-                  <span className="relative block aspect-square overflow-hidden border border-seam bg-sack-2">
-                    <Image src={g.images[0].src} alt={`${g.code} ${g.producer} bag in Arihant's godown`} fill sizes="(min-width: 1024px) 18vw, 45vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
-                  </span>
-                  <span className="t-code mt-1 block text-xl text-print">{g.code}</span>
+      {/* The concentrated pellet: one rubine band */}
+      <section className="frame pb-[clamp(4.5rem,10vw,8rem)]" aria-labelledby="cta-title">
+        <DoseBand>
+          <div className="grid grid-cols-1 gap-10 px-6 pb-10 pt-12 md:px-12 md:pb-14 md:pt-16 lg:grid-cols-12 lg:px-16">
+            <div className="lg:col-span-7">
+              <p className="text-sm font-medium text-on-dose/80">Send an enquiry</p>
+              <h2 id="cta-title" className="d-h1 mt-5 max-w-[16ch]">
+                Tell Arihant the grade and the quantity.
+              </h2>
+            </div>
+            <div className="flex flex-col justify-end gap-8 lg:col-span-5">
+              <p className="text-lg leading-relaxed text-on-dose/85">
+                {company.contactPerson} or the Arihant team comes back with the rate and the dispatch date. Material leaves the Malad godown {company.shipping.toLowerCase()}.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link href="/contact" className={btnOnDose}>
+                  Send an enquiry
+                  <ArrowRight aria-hidden className="size-4 rtl:-scale-x-100" />
                 </Link>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-2 text-sm text-ink-2">Photos from Arihant&apos;s godown.</p>
-        </div>
-        <Reveal className="lg:col-span-7">
-          <ul className="border-t-2 border-ink">
-            {famCounts.map((f) => (
-              <li key={f.id} className="border-b border-seam">
-                <Link href={`/products?family=${f.id}`} className="group flex min-h-16 items-center gap-4 py-3 hover:bg-sack-2">
-                  <FamilySwatch family={f.id} className="size-4" />
-                  <span className="t-h3 w-28 shrink-0 text-[1.4rem]">{f.short}</span>
-                  <span className="min-w-0 flex-1 text-ink-2">{f.label}</span>
-                  <span className="t-code text-3xl text-print">{String(f.count).padStart(2, "0")}</span>
-                  <ArrowRight aria-hidden className="size-5 shrink-0 opacity-40 group-hover:opacity-100 rtl:-scale-x-100" />
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <Link href="/products" className="mt-6 inline-flex min-h-13 items-center gap-3 border-2 border-ink px-5 font-semibold hover:bg-ink hover:text-sack">
-            Open the full register
-            <ArrowRight aria-hidden className="size-5 rtl:-scale-x-100" />
-          </Link>
-        </Reveal>
-      </section>
-
-      {/* How buying works */}
-      <section className="weave border-y-2 border-ink" aria-labelledby="how-title">
-        <div className="frame py-16 md:py-24">
-          <SectionHead no="03" label="How a rate works" title={<span id="how-title">Three lines and it moves.</span>} />
-          <ol className="mt-10 grid border-t-2 border-ink md:grid-cols-3">
-            {[
-              ["Send the grade", "Grade code or producer, quantity in bags or tonnes, and your delivery point."],
-              ["Get the rate", "Arihant confirms the rate and when the material can leave the godown."],
-              ["Dispatch by road", `Payment by ${company.payment.join(", ").toLowerCase().replace(/, ([^,]*)$/, " or $1")}.`],
-            ].map(([t, d], i) => (
-              <li key={t} className="border-b border-seam py-6 md:border-b-0 md:border-e md:px-6 md:first:ps-0 md:last:border-e-0">
-                <span className="t-code text-5xl text-print">{i + 1}</span>
-                <h3 className="t-h3 mt-3">{t}</h3>
-                <p className="mt-2 max-w-xs text-ink-2">{d}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      {/* Manifest + reviews */}
-      <section className="frame grid gap-12 py-16 md:py-24 lg:grid-cols-12" aria-labelledby="who-title">
-        <div className="lg:col-span-7">
-          <SectionHead no="04" label="The firm" title={<span id="who-title">A Malad partnership, trading granules since {company.since}.</span>} />
-          <dl className="mt-8 grid grid-cols-2 border-t-2 border-ink sm:grid-cols-3">
-            {[
-              ["Established", String(company.since)],
-              ["Constitution", company.legal],
-              ["Business", "Trader, distributor"],
-              ["Facility", "Warehouse and depot"],
-              ["Minimum order", terms.moq],
-              ["Delivery", terms.delivery],
-            ].map(([k, v]) => (
-              <div key={k} className="border-b border-seam py-4 pe-4">
-                <dt className="t-label text-ink-2">{k}</dt>
-                <dd className="mt-1 break-words text-lg font-semibold">{v}</dd>
+                <a href={`tel:${company.phone.tel}`} className={btnOnDoseSecondary}>
+                  <Phone aria-hidden className="size-4" />
+                  Call {company.contactPerson}
+                </a>
               </div>
-            ))}
-          </dl>
-          <Link href="/about" className="mt-6 inline-block font-semibold underline underline-offset-4">
-            About Arihant
-          </Link>
-        </div>
-        <Reveal className="lg:col-span-5">
-          <div className="border-2 border-ink p-6">
-            <p className="t-label text-ink-2">Buyer ratings on {reviews.source}</p>
-            <p className="mt-3">
-              <span className="t-code text-7xl text-print">{reviews.average}</span>
-              <span className="t-h3 ms-2 text-ink-2">/ 5</span>
-            </p>
-            <p className="mt-1 font-semibold">from {reviews.count} buyers</p>
-            <p className="mt-5 text-ink-2">Recent buyers in {reviewStates.slice(0, -1).join(", ")} and {reviewStates.at(-1)}.</p>
-            <Link href="/reviews" className="mt-5 inline-block font-semibold underline underline-offset-4">
-              Read the ratings
-            </Link>
+            </div>
           </div>
-        </Reveal>
-      </section>
-
-      {/* Closing CTA */}
-      <section className="relative isolate overflow-hidden border-t-2 border-ink" aria-labelledby="cta-title">
-        <Image src={photos.office.src} alt="" fill sizes="100vw" className="-z-10 object-cover" />
-        <div className="absolute inset-0 -z-10 bg-ink/80" aria-hidden />
-        <div className="frame py-20 text-sack md:py-28">
-          <h2 id="cta-title" className="t-h2 max-w-3xl">Tell us the grade and the quantity. We&apos;ll come back with a rate.</h2>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link href="/contact" className="inline-flex min-h-13 items-center justify-between gap-6 bg-print px-5 font-semibold text-on-print hover:bg-print-deep">
-              Request a rate
-              <ArrowRight aria-hidden className="size-5 rtl:-scale-x-100" />
-            </Link>
-            <a href={`tel:${company.phone.tel}`} className="inline-flex min-h-13 items-center justify-center gap-2 border-2 border-sack px-5 font-semibold hover:bg-sack hover:text-ink">
-              <Phone aria-hidden className="size-4" />
-              Call {company.contactPerson}
-            </a>
-          </div>
-        </div>
+        </DoseBand>
       </section>
     </>
   );

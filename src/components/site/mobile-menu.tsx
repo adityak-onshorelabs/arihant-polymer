@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
+import { btnPrimary } from "./ui";
 
 export function MobileMenu({ items }: { items: readonly { href: string; label: string }[] }) {
   const [open, setOpen] = useState(false);
@@ -29,24 +30,24 @@ export function MobileMenu({ items }: { items: readonly { href: string; label: s
         aria-expanded={open}
         aria-controls={id}
         onClick={() => setOpen((o) => !o)}
-        className="flex size-11 items-center justify-center border-2 border-ink"
+        className="flex size-11 items-center justify-center rounded-full border border-rim/60 text-graphite"
       >
         <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
         {open ? <X aria-hidden className="size-5" /> : <Menu aria-hidden className="size-5" />}
       </button>
       {open && (
-        <nav id={id} aria-label="Main" className="absolute inset-x-0 top-full border-b-2 border-ink bg-sack">
-          <ul className="frame py-2">
+        <nav id={id} aria-label="Main" className="absolute inset-x-0 top-full border-b border-seal bg-film">
+          <ul className="frame py-3">
             {items.map((n) => (
-              <li key={n.href} className="border-b border-seam last:border-b-0">
-                <Link href={n.href} onClick={() => setOpen(false)} className="flex min-h-13 items-center text-lg font-semibold">
+              <li key={n.href} className="border-b border-seal last:border-b-0">
+                <Link href={n.href} onClick={() => setOpen(false)} className="flex min-h-14 items-center text-lg font-medium">
                   {n.label}
                 </Link>
               </li>
             ))}
-            <li className="py-3">
-              <Link href="/contact" onClick={() => setOpen(false)} className="flex min-h-13 items-center justify-center bg-print font-semibold text-on-print">
-                Request a rate
+            <li className="pb-2 pt-4">
+              <Link href="/contact" onClick={() => setOpen(false)} className={`${btnPrimary} w-full`}>
+                Send an enquiry
               </Link>
             </li>
           </ul>

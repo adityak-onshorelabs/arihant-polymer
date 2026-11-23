@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Big_Shoulders, Big_Shoulders_Stencil, Hanken_Grotesk } from "next/font/google";
+import { Big_Shoulders, Big_Shoulders_Stencil, Geologica, Hanken_Grotesk } from "next/font/google";
 import { company } from "@/content/site";
 import "./globals.css";
 
@@ -13,6 +13,13 @@ const stencil = Big_Shoulders_Stencil({
   subsets: ["latin"],
   axes: ["opsz"],
   variable: "--font-stencil-face",
+});
+
+/* The marketing site's one family. SHRP (sharpness) is used: codes soft like a pellet, text crisper. */
+const geologica = Geologica({
+  subsets: ["latin"],
+  axes: ["SHRP"],
+  variable: "--font-geologica",
 });
 
 const hanken = Hanken_Grotesk({
@@ -32,7 +39,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${shoulders.variable} ${stencil.variable} ${hanken.variable} antialiased`}>
+    <html lang="en" suppressHydrationWarning className={`${shoulders.variable} ${stencil.variable} ${hanken.variable} ${geologica.variable} antialiased`}>
       <body className="min-h-dvh">{children}</body>
     </html>
   );

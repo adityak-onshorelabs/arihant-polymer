@@ -1,5 +1,9 @@
 import { SiteFooter, SiteHeader } from "@/components/site/chrome";
 import { company } from "@/content/site";
+import { SmoothScroll } from "@/components/site/motion/smooth-scroll";
+import { ScrollPellet } from "@/components/site/motion/scroll-pellet";
+import { IntroClock } from "@/components/site/motion/intro-clock";
+import { Loader, introScript } from "@/components/site/loader";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -22,7 +26,12 @@ const jsonLd = {
 
 export default function SiteLayout({ children }: LayoutProps<"/">) {
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="site flex min-h-dvh flex-col">
+      <script dangerouslySetInnerHTML={{ __html: introScript }} />
+      <Loader />
+      <IntroClock />
+      <SmoothScroll />
+      <ScrollPellet />
       <SiteHeader />
       <main id="main" tabIndex={-1} className="flex-1 outline-none">
         {children}

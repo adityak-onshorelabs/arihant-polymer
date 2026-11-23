@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# client proposals and plans (contain pricing; this repo is public)
+/reference/*.pdf
+/reference/Arihant plan - *.png

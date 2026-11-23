@@ -1,31 +1,32 @@
 "use client";
 
 /*
- * Grade lookup, the site's signature interaction.
- * Adapted from Watermelon UI `command-search` (reference/watermelon/command-search.tsx):
- * kept the filter-as-you-type list with arrow-key navigation; removed the
- * floating palette, layoutId morph, backdrop blur and demo items; rebuilt as an
- * ARIA combobox + listbox that prints the chosen grade as a bag face and hands
- * it to the rate request.
+ * The signature: "grade, then how much".
+ * 1. Find a grade: an ARIA combobox (adapted earlier from Watermelon UI
+ *    `command-search`: filter-as-you-type with arrow keys; palette, blur and demo
+ *    items removed). The chosen grade pours into a sample pouch and its label
+ *    presses on.
+ * 2. Say how much: tonnes become bags (`QuantityToBags`), then a prefilled enquiry.
  */
 
 import Link from "next/link";
-import { useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ArrowRight, Phone, Search } from "lucide-react";
+import { useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { ArrowRight, Search } from "lucide-react";
 import { gradeSlug, gradeTitle, searchGrades, type Grade } from "@/content/catalogue";
-import { company } from "@/content/site";
-import { BagFace, FamilySwatch } from "./bag-face";
+import { FamilySwatch } from "./bag-face";
+import { GradeSticker, Pouch, PouchFill } from "./pouch";
+import { QuantityToBags } from "./quantity";
+import { textLink } from "./ui";
 
 const SUGGESTIONS = ["MI3530", "Reliance raffia", "GAIL", "HDPE film", "blow moulding", "PVC"];
 
-export function GradeLookup({ grades, initial }: { grades: Grade[]; initial: Grade }) {
+export function GradeSample({ grades, initial, heading, intro }: { grades: Grade[]; initial: Grade; heading: ReactNode; intro?: ReactNode }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const [picked, setPicked] = useState<Grade>(initial);
+  const [pours, setPours] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const reduce = useReducedMotion();
   const id = useId();
   const listId = `${id}-list`;
 
@@ -34,6 +35,7 @@ export function GradeLookup({ grades, initial }: { grades: Grade[]; initial: Gra
 
   function pick(g: Grade) {
     setPicked(g);
+    setPours((n) => n + 1);
     setOpen(false);
     setQuery(gradeTitle(g));
   }
@@ -58,147 +60,132 @@ export function GradeLookup({ grades, initial }: { grades: Grade[]; initial: Gra
 
   const slug = gradeSlug(picked);
   const title = gradeTitle(picked);
+  const first = pours === 0;
 
   return (
-    <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
-      <div className="lg:col-span-5">
-        <label htmlFor={`${id}-input`} className="t-label text-ink-2">
-          Grade code, producer or process
-        </label>
-        <div className="relative mt-2">
-          <div className="flex h-16 items-center gap-3 border-2 border-ink bg-sack px-4 focus-within:outline focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-print">
-            <Search aria-hidden className="size-5 shrink-0 text-ink-2" />
-            <input
-              ref={inputRef}
-              id={`${id}-input`}
-              type="text"
-              role="combobox"
-              aria-expanded={showList}
-              aria-controls={listId}
-              aria-autocomplete="list"
-              aria-activedescendant={showList && results[active] ? `${id}-opt-${active}` : undefined}
-              autoComplete="off"
-              spellCheck={false}
-              placeholder="e.g. MI3530"
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setActive(0);
-                setOpen(true);
-              }}
-              onFocus={() => setOpen(true)}
-              onBlur={() => setTimeout(() => setOpen(false), 120)}
-              onKeyDown={onKey}
-              className="h-full w-full bg-transparent text-xl font-semibold uppercase tracking-wide outline-none placeholder:normal-case placeholder:font-normal placeholder:tracking-normal placeholder:text-ink-2/70"
-            />
-          </div>
+    <div>
+      <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-end lg:gap-16">
+        <div className="lg:col-span-7">
+          {heading}
+          {intro}
 
-          {showList && (
-            <ul
-              id={listId}
-              role="listbox"
-              aria-label="Matching grades"
-              className="absolute inset-x-0 top-full z-30 max-h-96 overflow-y-auto border-2 border-t-0 border-ink bg-sack"
-            >
-              {results.length === 0 ? (
-                <li className="px-4 py-4 text-ink-2" role="option" aria-selected={false} aria-disabled>
-                  Not in the listed range. Send a rate request and ask Arihant about it.
-                </li>
-              ) : (
-                results.map((g, i) => (
-                  <li
-                    key={gradeSlug(g)}
-                    id={`${id}-opt-${i}`}
-                    role="option"
-                    aria-selected={i === active}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => pick(g)}
-                    onMouseEnter={() => setActive(i)}
-                    className={`flex min-h-12 cursor-pointer items-center gap-3 border-b border-seam px-4 py-2 last:border-b-0 ${
-                      i === active ? "bg-print-tint" : ""
-                    }`}
-                  >
-                    <FamilySwatch family={g.family} />
-                    <span className="t-code w-28 shrink-0 text-xl text-print">{gradeTitle(g)}</span>
-                    <span className="min-w-0 truncate text-sm">
-                      <span className="font-semibold">{g.producer ?? "Generic"}</span>
-                      <span className="text-ink-2"> · {g.process}</span>
-                    </span>
-                  </li>
-                ))
-              )}
-            </ul>
-          )}
-        </div>
+          <div className="settle mt-10 max-w-xl" style={{ "--d": "0.7s" } as React.CSSProperties}>
+            <label htmlFor={`${id}-input`} className="meta">
+              Grade code, producer or process
+            </label>
+            <div className="relative mt-3">
+              <div className="flex h-16 items-center gap-3 rounded-2xl border border-rim/70 bg-label px-5 shadow-[0_10px_30px_-18px_oklch(23%_0.018_250/0.35)] transition-colors hover:border-graphite-2 focus-within:border-graphite focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-graphite">
+                <Search aria-hidden className="size-5 shrink-0 text-graphite-2" />
+                <input
+                  ref={inputRef}
+                  id={`${id}-input`}
+                  type="text"
+                  role="combobox"
+                  aria-expanded={showList}
+                  aria-controls={listId}
+                  aria-autocomplete="list"
+                  aria-activedescendant={showList && results[active] ? `${id}-opt-${active}` : undefined}
+                  autoComplete="off"
+                  spellCheck={false}
+                  placeholder="e.g. MI3530"
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    setActive(0);
+                    setOpen(true);
+                  }}
+                  onFocus={() => setOpen(true)}
+                  onBlur={() => setTimeout(() => setOpen(false), 120)}
+                  onKeyDown={onKey}
+                  className="h-full w-full bg-transparent text-xl tracking-[-0.01em] outline-none focus-visible:outline-none placeholder:text-graphite-2/60"
+                />
+              </div>
 
-        <p className="mt-4 text-sm text-ink-2">Try:</p>
-        <ul className="mt-2 flex flex-wrap gap-2">
-          {SUGGESTIONS.map((s) => (
-            <li key={s}>
-              <button
-                type="button"
-                onClick={() => {
-                  setQuery(s);
-                  setActive(0);
-                  setOpen(true);
-                  const first = searchGrades(s, grades)[0];
-                  if (first) setPicked(first);
-                  inputRef.current?.focus();
-                }}
-                className="min-h-11 border border-ink px-3 text-sm font-semibold hover:bg-ink hover:text-sack"
-              >
-                {s}
-              </button>
-            </li>
-          ))}
-        </ul>
-
-        <p className="mt-8 max-w-md text-ink-2">
-          {grades.length} grades listed from {new Set(grades.map((g) => g.producer).filter(Boolean)).size} producers. Not on the list? Ask Arihant about it.
-        </p>
-      </div>
-
-      <div className="lg:col-span-7">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={slug}
-            initial={reduce ? false : { clipPath: "inset(0 0 100% 0)" }}
-            animate={{ clipPath: "inset(0 0 0% 0)" }}
-            exit={reduce ? undefined : { opacity: 0 }}
-            transition={{ duration: reduce ? 0 : 0.45, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <div className={picked.images[0] ? "grid gap-3 sm:grid-cols-[minmax(0,1fr)_11rem]" : ""}>
-              <BagFace grade={picked} size="lg" />
-              {picked.images[0] && (
-                <Link href={`/products/${slug}`} className="group relative hidden overflow-hidden border-2 border-ink bg-sack-2 sm:block">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={picked.images[0].src} alt={`${title} bag in Arihant's godown`} className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
-                  <span className="absolute inset-x-0 bottom-0 bg-ink/80 px-2 py-1 text-xs font-semibold text-sack">In the godown</span>
-                </Link>
+              {showList && (
+                <ul
+                  id={listId}
+                  role="listbox"
+                  data-lenis-prevent
+                  aria-label="Matching grades"
+                  className="absolute inset-x-0 top-full z-30 mt-2 max-h-96 overflow-y-auto rounded-2xl border border-seal bg-label py-2 shadow-[0_18px_40px_-20px_oklch(23%_0.018_250/0.35)]"
+                >
+                  {results.length === 0 ? (
+                    <li className="px-5 py-4 text-graphite-2" role="option" aria-selected={false} aria-disabled>
+                      Not in the listed range. Send an enquiry and ask Arihant about it.
+                    </li>
+                  ) : (
+                    results.map((g, i) => (
+                      <li
+                        key={gradeSlug(g)}
+                        id={`${id}-opt-${i}`}
+                        role="option"
+                        aria-selected={i === active}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => pick(g)}
+                        onMouseEnter={() => setActive(i)}
+                        className={`flex min-h-12 cursor-pointer items-center gap-3 px-5 py-2 ${i === active ? "bg-film" : ""}`}
+                      >
+                        <FamilySwatch family={g.family} />
+                        <span className="d-code w-28 shrink-0 text-lg">{gradeTitle(g)}</span>
+                        <span className="min-w-0 truncate text-sm text-graphite-2">
+                          {g.producer ?? "Generic"} · {g.process}
+                        </span>
+                      </li>
+                    ))
+                  )}
+                </ul>
               )}
             </div>
-          </motion.div>
-        </AnimatePresence>
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-          <Link
-            href={`/contact?grade=${slug}`}
-            className="inline-flex min-h-13 flex-1 items-center justify-between gap-3 bg-print px-5 font-semibold text-on-print hover:bg-print-deep"
-          >
-            Request a rate for {title}
-            <ArrowRight aria-hidden className="size-5 rtl:-scale-x-100" />
-          </Link>
-          <a
-            href={`tel:${company.phone.tel}`}
-            className="inline-flex min-h-13 items-center justify-center gap-2 border-2 border-ink px-5 font-semibold hover:bg-ink hover:text-sack"
-          >
-            <Phone aria-hidden className="size-4" />
-            {company.phone.display}
-          </a>
+
+            <ul className="mt-4 flex flex-wrap gap-2" aria-label="Try">
+              {SUGGESTIONS.map((s) => (
+                <li key={s}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuery(s);
+                      setActive(0);
+                      setOpen(true);
+                      const hit = searchGrades(s, grades)[0];
+                      if (hit) {
+                        setPicked(hit);
+                        setPours((n) => n + 1);
+                      }
+                      inputRef.current?.focus();
+                    }}
+                    className="min-h-11 rounded-full border border-rim/45 px-4 text-sm text-graphite-2 transition-colors hover:border-graphite hover:text-graphite"
+                  >
+                    {s}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-        <Link href={`/products/${slug}`} className="mt-3 inline-block text-sm font-semibold underline underline-offset-4">
-          Grade details
-        </Link>
+
+        <div className="lg:col-span-5">
+          <Pouch className="mx-auto w-full max-w-[26rem]" windowClassName="aspect-[4/5]" sticker={<GradeSticker key={`s-${slug}-${pours}`} grade={picked} press delay={first ? 1.6 : 0.95} className="absolute inset-x-4 bottom-4 z-[4] sm:inset-x-6 sm:bottom-6" />}>
+            <PouchFill key={`f-${slug}-${pours}`} grade={picked} pour delay={first ? 0.35 : 0} fill={0.78} />
+          </Pouch>
+          <p className="mx-auto mt-3 flex max-w-[26rem] items-center justify-between gap-3 text-sm text-graphite-2" aria-live="polite">
+            <span>Drawn sample of {title}</span>
+            <Link href={`/products/${slug}`} className={`${textLink} text-sm`}>
+              Photos and specs
+              <ArrowRight aria-hidden className="size-3.5 rtl:-scale-x-100" />
+            </Link>
+          </p>
+        </div>
       </div>
+
+      <section id="how-much" aria-labelledby={`${id}-how`} className="mt-20 scroll-mt-24 border-t border-seal pt-10 md:mt-28 md:pt-14">
+        <div className="mb-10 flex flex-wrap items-baseline justify-between gap-4">
+          <h2 id={`${id}-how`} className="d-h2">
+            Then, how much?
+          </h2>
+          <p className="eyebrow">Step 2 of 2 · {title}</p>
+        </div>
+        <QuantityToBags grade={picked} />
+      </section>
     </div>
   );
 }

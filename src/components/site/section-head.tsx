@@ -1,15 +1,13 @@
 import type { ReactNode } from "react";
+import { Settle } from "./motion/effects";
 
-/** Section header printed like a bag panel label: number, seam, title. */
-export function SectionHead({ no, label, title, children }: { no: string; label: string; title: ReactNode; children?: ReactNode }) {
+/** Eyebrow (with the rubine pellet), a heading and an optional lead line, settling in on first view. */
+export function SectionHead({ label, title, children, className }: { label: string; title: ReactNode; children?: ReactNode; className?: string }) {
   return (
-    <div className="max-w-3xl">
-      <p className="t-label flex items-center gap-3 text-print">
-        <span className="t-code text-2xl">{no}</span>
-        <span>{label}</span>
-      </p>
-      <h2 className="t-h2 mt-3">{title}</h2>
-      {children ? <div className="t-lead mt-4 text-ink-2">{children}</div> : null}
-    </div>
+    <Settle stagger className={className ?? "max-w-2xl"}>
+      <p className="eyebrow">{label}</p>
+      <h2 className="d-h2 mt-5">{title}</h2>
+      {children ? <div className="lead mt-5">{children}</div> : null}
+    </Settle>
   );
 }

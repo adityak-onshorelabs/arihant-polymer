@@ -107,3 +107,30 @@ export function searchGrades(query: string, list: Grade[] = grades): Grade[] {
     .sort((a, b) => a.score - b.score)
     .map((x) => x.g);
 }
+
+/** Kilograms per bag, read from the listed packing. Most grades ship in 25 kg sacks; a few in 1100 kg jumbo bags. */
+export function packKg(g: Grade): number {
+  const p = (g.packing ?? "").toLowerCase();
+  if (/1100\s*kg/.test(p)) return 1100;
+  return 25;
+}
+
+/** Minimum order in kilograms, from the listing (null when not stated). */
+export function moqKg(g: Grade): number | null {
+  const m = (g.moq ?? "").match(/([\d.]+)\s*kg/i);
+  return m ? Number(m[1]) : null;
+}
+
+/** How the granules of a family look in a clear pouch, for the drawn granule fields. */
+export type GranuleLook = "milky" | "clear" | "opaque" | "powder" | "dose";
+export const familyLook: Record<Family, GranuleLook> = {
+  PP: "milky",
+  HDPE: "milky",
+  LLDPE: "milky",
+  LDPE: "milky",
+  STYRENICS: "clear",
+  PVC: "powder",
+  PET: "clear",
+  ENGG: "clear",
+  ADDITIVE: "dose",
+};
